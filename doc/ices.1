@@ -1,0 +1,210 @@
+.TH ICES 1 "November 2026" "gsradio 1.0.0 (ices 0.4)" "Icecast media streaming system"
+.SH NAME
+ices \- stream MP3 audio to an icecast server
+.SH SYNOPSIS
+.B ices
+[\fB\-BVv\fR]
+[\fB\-c\fR \fIconfigfile\fR]
+[\fB\-D\fR \fIbasedir\fR]
+[\fB\-S builtin\fR [\fB\-F\fR \fIplaylist\fR] [\fB\-r\fR] | \fB\-S python\fR|\fBperl\fR [\fB\-M\fR \fImodule\fR]]
+[\fB\-C\fR \fIcrossfadesecs\fR]
+[[\fB\-m\fR \fImount\fR] [\fB\-h\fR \fIhost\fR] [\fB\-p\fR \fIport\fR] [\fB\-P\fR \fIpassword\fR]
+[\fB\-t\fR \fIprotocol\fR] [\fB\-n\fR \fIname\fR] [\fB\-g\fR \fIgenre\fR] [\fB\-d\fR \fIdescription\fR]
+[\fB\-u\fR \fIurl\fR] [\fB\-s\fR] [\fB\-b\fR \fIbitrate\fR] [\fB\-f\fR \fIdumpfile\fR]
+[\fB\-R\fR [\fB\-H\fR \fIsamplerate\fR] [\fB\-N\fR \fIchannels\fR]]] ...
+.SH DESCRIPTION
+.B ices
+is a source client for icecast servers, compatible with IceS 0.4 and built
+on GStreamer. Its features include:
+.IP \(bu 2
+A scripting interface to its playlist engine, using python or perl, in
+addition to a builtin static playlist.
+.IP \(bu
+Reading source audio from a FIFO or standard input.
+.IP \(bu
+On-the-fly reencoding of the source audio to a different bitrate, number of
+channels and/or sample rate. Ogg Vorbis and FLAC files (and anything else
+GStreamer can decode) are transcoded to MP3.
+.IP \(bu
+Crossfading between tracks (requires reencoding on every stream).
+.IP \(bu
+Multiple streams from the same playlist, e.g. for broadband and narrowband
+listeners at the same time.
+.IP \(bu
+A constantly updated cue file describing the current track.
+.SH OPTIONS
+.SS "Execution options"
+.TP
+.B \-B
+Detach from the console and run in the background. The process id is
+written to \fIbasedir\fR/ices.pid.
+.TP
+.BI \-c " configfile"
+Load configuration from \fIconfigfile\fR instead of the default
+(\fBices.conf\fR in the current directory or the system configuration
+directory). Command line options override the file.
+.TP
+.BI \-D " basedir"
+Write the log, cue and pid files to \fIbasedir\fR (default /tmp).
+.TP
+.B \-V
+Show version information and compile-time options and exit.
+.TP
+.B \-v
+Run in verbose mode.
+.SS "Playlist options"
+.TP
+.BI \-S " interpreter"
+Playlist handler: \fBbuiltin\fR (default), \fBpython\fR or \fBperl\fR.
+.TP
+.BI \-F " playlist"
+For the builtin handler, the playlist file: one audio file path per line
+(default playlist.txt). Blank lines and lines starting with # are ignored.
+The file is re-read when it changes. A line consisting of \fB\-\fR reads
+audio from standard input.
+.TP
+.B \-r
+Play the builtin playlist in random order.
+.TP
+.BI \-M " module"
+Python or perl module to load instead of the default, \fBices\fR.
+.TP
+.BI \-C " crossfadesecs"
+Crossfade between tracks for \fIcrossfadesecs\fR seconds. Tracks shorter
+than 10 seconds or twice the fade length are not faded into.
+.SS "Stream options"
+.TP
+.BI \-m " mount"
+Create a stream at mountpoint \fImount\fR. May be given several times to
+create multiple streams from the same playlist; the stream options that
+follow apply to that mount only. The default mount is /ices.
+.TP
+.BI \-h " host"
+Icecast server host (default 127.0.0.1).
+.TP
+.BI \-p " port"
+Icecast server port (default 8000). With the icy protocol, libshout
+connects to \fIport\fR+1, as Shoutcast servers expect.
+.TP
+.BI \-P " password"
+Source password (default letmein).
+.TP
+.BI \-t " protocol"
+\fBhttp\fR (icecast 2, default), \fBxaudiocast\fR (icecast 1) or
+\fBicy\fR (shoutcast).
+.TP
+.B \-i
+Same as \fB\-t icy\fR.
+.TP
+.BI \-n " name"
+Stream name.
+.TP
+.BI \-g " genre"
+Stream genre.
+.TP
+.BI \-d " description"
+Stream description.
+.TP
+.BI \-u " url"
+Stream URL.
+.TP
+.B \-s
+Do not mark the stream as public (no directory listing).
+.TP
+.BI \-b " bitrate"
+Stream bitrate in kbps (default 128). Unless reencoding, this is only
+informational.
+.TP
+.BI \-f " dumpfile"
+Ask the server to dump the stream to \fIdumpfile\fR (xaudiocast only).
+.TP
+.B \-R
+Reencode this stream at the bitrate given with \fB\-b\fR. MP3 files that
+already match the stream's bitrate, sample rate and channels are passed
+through unchanged. Required for Ogg Vorbis and FLAC input.
+.TP
+.BI \-H " samplerate"
+Output sample rate when reencoding. By default LAME's choice for the
+bitrate is used.
+.TP
+.BI \-N " channels"
+Output channels when reencoding: 1 (mono) or 2 (stereo).
+.SH CONFIGURATION FILE
+An XML document whose root is \fBConfiguration\fR in the namespace
+\fBhttp://www.icecast.org/projects/ices\fR, containing:
+.TP
+.B Playlist
+\fBFile\fR, \fBRandomize\fR, \fBType\fR, \fBModule\fR, \fBCrossfade\fR.
+.TP
+.B Execution
+\fBBackground\fR, \fBVerbose\fR, \fBBaseDirectory\fR.
+.TP
+.B Stream
+(repeatable) \fBServer\fR (\fBHostname\fR, \fBPort\fR, \fBPassword\fR,
+\fBProtocol\fR), \fBMountpoint\fR, \fBDumpfile\fR, \fBName\fR,
+\fBGenre\fR, \fBDescription\fR, \fBURL\fR, \fBPublic\fR, \fBBitrate\fR,
+\fBReencode\fR, \fBSamplerate\fR, \fBChannels\fR.
+.PP
+See ices.conf.dist for an annotated example.
+.SH PLAYLIST SCRIPTING
+A python (3) or perl module may define these functions:
+.TP
+.B ices_init
+Called once at startup. A negative result makes ices exit.
+.TP
+.B ices_shutdown
+Called before ices exits.
+.TP
+.B ices_get_next
+Called at each track change; returns the path of the next file to play. An
+empty result ends streaming. This function is required.
+.TP
+.B ices_get_metadata
+Called after \fBices_get_next\fR. If it returns a string, it is used as the
+streamed title instead of one built from the file's tags or name.
+.TP
+.B ices_get_lineno
+Called after \fBices_get_next\fR; the returned number is written to the cue
+file.
+.PP
+The older names ices_python_initialize, ices_python_shutdown,
+ices_python_get_next, ices_python_get_metadata and
+ices_python_get_current_lineno (and their ices_perl_ equivalents) are also
+recognized. Modules are searched for in the playlist module directory and
+the current directory (plus PYTHONPATH for python). Perl modules must end
+with "1;".
+.SH SIGNALS
+.TP
+.B SIGINT, SIGTERM
+Clean shutdown.
+.TP
+.B SIGHUP
+Close and reopen the log file and reload the playlist (or restart the
+playlist script).
+.TP
+.B SIGUSR1
+Skip to the next track immediately.
+.SH FILES
+.TP
+.I basedir/ices.log
+Log file.
+.TP
+.I basedir/ices.cue
+Current track: file name, size, bitrate, length (d:h:m:s), percent played,
+playlist line, artist and title, one per line.
+.TP
+.I basedir/ices.pid
+Process id when running in the background.
+.TP
+.I sysconfdir/ices.conf
+Default configuration file.
+.TP
+.I moduledir/ices.py, moduledir/ices.pm
+Default playlist modules.
+.SH EXIT STATUS
+0 on a normal shutdown (signal or end of playlist), 1 on error, including
+more than 10 consecutive unplayable tracks or more than 10 consecutive
+errors on a stream.
+.SH AUTHORS
+IceS was originally written by Alexander Hav\(:ang and maintained by
+Brendan Cully. This GStreamer-based reimplementation is part of gsradio.

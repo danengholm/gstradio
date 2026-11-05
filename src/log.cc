@@ -3,11 +3,12 @@
 
 #include "src/log.h"
 
+#include <array>
 #include <atomic>
 #include <cerrno>
-#include <chrono>
 #include <cstdio>
 #include <cstring>
+#include <ctime>
 #include <mutex>
 #include <print>
 #include <string>
@@ -83,9 +84,14 @@ void Write(std::string_view message, bool is_debug) {
     std::scoped_lock lock(s.mutex);
     if (s.file) {
         // Unlike the original, timestamp file entries: it makes the log useful.
-        auto now = std::chrono::floor<std::chrono::seconds>(std::chrono::system_clock::now());
-        auto local = std::chrono::zoned_time{std::chrono::current_zone(), now};
-        std::println(s.file, "[{:%Y-%m-%d %H:%M:%S}] {}{}", local, prefix, message);
+        // localtime_r() rather than std::chrono::current_zone(), which needs
+        // libstdc++'s tzdb and is unreliable outside glibc systems.
+        const std::time_t now = std::time(nullptr);
+        std::tm local{};
+        std::array<char, 32> stamp{};
+        localtime_r(&now, &local);
+        std::strftime(stamp.data(), stamp.size(), "%Y-%m-%d %H:%M:%S", &local);
+        std::println(s.file, "[{}] {}{}", stamp.data(), prefix, message);
     }
     if (!g_daemon) {
         std::println(stdout, "{}{}", prefix, message);

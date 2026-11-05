@@ -34,7 +34,11 @@ Then:
 
 CMake options: `-DICES_WITH_PYTHON=OFF`, `-DICES_WITH_PERL=OFF`,
 `-DICES_ETCDIR=...` (where `ices.conf` is looked up, default
-`$prefix/etc`) and `-DICES_MODULEDIR=...` (playlist module directory).
+`$prefix/etc`), `-DICES_MODULEDIR=...` (playlist module directory),
+`-DICES_EXAMPLESDIR=share/examples/gsradio` (install the sample configuration
+files there instead of into the two directories above, for packaging) and
+`-DICES_PYTHON_PKGCONFIG=python-3.12-embed` (pkg-config module for embedding
+Python, if the system has no `python3-embed`).
 
 ## Quick start
 

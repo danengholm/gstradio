@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.28)
 
 project(gsradio
-  VERSION 1.0.0
+  VERSION 0.1
   DESCRIPTION "IceS 0.4 compatible MP3 streaming source for Icecast, built on GStreamer"
   LANGUAGES C CXX)
 
@@ -21,10 +21,15 @@ option(ICES_WITH_PERL   "Embed Perl for scripted playlists"   ON)
 
 set(ICES_ETCDIR    "${CMAKE_INSTALL_FULL_SYSCONFDIR}" CACHE PATH "Directory searched for ices.conf")
 set(ICES_MODULEDIR "${CMAKE_INSTALL_FULL_SYSCONFDIR}/ices/modules" CACHE PATH "Playlist module directory")
+# If set, the sample ices.conf/ices.py/ices.pm are installed here instead of into
+# ICES_ETCDIR and ICES_MODULEDIR (packaging systems copy them into place).
+set(ICES_EXAMPLESDIR "" CACHE STRING "Install sample configuration files here (relative to the prefix)")
+# pkg-config module providing the embeddable Python library.
+set(ICES_PYTHON_PKGCONFIG "python3-embed" CACHE STRING "pkg-config module for embedding Python")
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GST REQUIRED IMPORTED_TARGET
-  gstreamer-1.0>=1.20 gstreamer-app-1.0 gstreamer-audio-1.0 gstreamer-tag-1.0 gstreamer-pbutils-1.0)
+  gstreamer-1.0>=1.20 gstreamer-app-1.0 gstreamer-audio-1.0 gstreamer-tag-1.0)
 pkg_check_modules(SHOUT  REQUIRED IMPORTED_TARGET shout>=2.4.3)
 pkg_check_modules(LIBXML REQUIRED IMPORTED_TARGET libxml-2.0)
 
@@ -67,14 +72,14 @@ endif()
 # ---- Embedded Python -------------------------------------------------------
 set(ICES_HAVE_PYTHON 0)
 if(ICES_WITH_PYTHON)
-  pkg_check_modules(PYEMBED IMPORTED_TARGET python3-embed)
+  pkg_check_modules(PYEMBED IMPORTED_TARGET ${ICES_PYTHON_PKGCONFIG})
   if(PYEMBED_FOUND)
     set(ICES_HAVE_PYTHON 1)
     target_sources(ices PRIVATE src/playlist_python.cc)
     target_link_libraries(ices PRIVATE PkgConfig::PYEMBED)
     message(STATUS "Python playlist support: yes (${PYEMBED_VERSION})")
   else()
-    message(STATUS "Python playlist support: no (python3-embed not found)")
+    message(STATUS "Python playlist support: no (${ICES_PYTHON_PKGCONFIG} not found)")
   endif()
 endif()
 
@@ -121,8 +126,12 @@ target_compile_definitions(ices PRIVATE
 configure_file(src/build_config.h.in "${CMAKE_CURRENT_BINARY_DIR}/src/build_config.h" @ONLY)
 
 install(TARGETS ices RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-install(FILES conf/ices.conf.dist DESTINATION ${CMAKE_INSTALL_SYSCONFDIR})
-install(FILES conf/ices.py.dist conf/ices.pm.dist DESTINATION ${ICES_MODULEDIR})
+if(ICES_EXAMPLESDIR)
+  install(FILES conf/ices.conf.dist conf/ices.py.dist conf/ices.pm.dist DESTINATION ${ICES_EXAMPLESDIR})
+else()
+  install(FILES conf/ices.conf.dist DESTINATION ${CMAKE_INSTALL_SYSCONFDIR})
+  install(FILES conf/ices.py.dist conf/ices.pm.dist DESTINATION ${ICES_MODULEDIR})
+endif()
 install(FILES doc/ices.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
 enable_testing()

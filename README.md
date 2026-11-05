@@ -13,32 +13,43 @@ log/cue/pid files and exit behaviour.
 
 ## Building
 
-Requirements: a C++23 compiler (GCC 14+ or Clang 18+), CMake ≥ 3.28,
-GStreamer ≥ 1.20 with gst-plugins-base and gst-plugins-good (`lamemp3enc`,
-`flacdec`, `vorbisdec`, `mpg123audiodec`), libshout ≥ 2.4.3 and libxml2.
-Optional: Python 3 (embed) and Perl for scripted playlists, and liblame
-headers so default sample rates are chosen exactly as LAME/ices0 did.
+Requirements: a C++23 compiler (GCC 14+ or Clang 18+), a POSIX shell and
+make (BSD or GNU), pkg-config, GStreamer ≥ 1.20 with gst-plugins-base and
+gst-plugins-good (`lamemp3enc`, `flacdec`, `vorbisdec`, `mpg123audiodec`),
+libshout ≥ 2.4.3 and libxml2. Optional: Python 3 (embed) and Perl for
+scripted playlists, and liblame headers so default sample rates are chosen
+exactly as LAME/ices0 did.
 
 Debian/Ubuntu:
 
-    sudo apt install build-essential cmake pkg-config libxml2-dev libshout-dev \
+    sudo apt install build-essential pkg-config libxml2-dev libshout-dev \
         libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
         gstreamer1.0-plugins-good gstreamer1.0-plugins-base \
         libmp3lame-dev python3-dev libperl-dev
 
 Then:
 
-    cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-    cmake --build build -j
-    sudo cmake --install build        # optional
+    ./configure
+    make
+    sudo make install        # optional; honours DESTDIR
 
-CMake options: `-DICES_WITH_PYTHON=OFF`, `-DICES_WITH_PERL=OFF`,
-`-DICES_ETCDIR=...` (where `ices.conf` is looked up, default
-`$prefix/etc`), `-DICES_MODULEDIR=...` (playlist module directory),
-`-DICES_EXAMPLESDIR=share/examples/gsradio` (install the sample configuration
-files there instead of into the two directories above, for packaging) and
-`-DICES_PYTHON_PKGCONFIG=python-3.12-embed` (pkg-config module for embedding
-Python, if the system has no `python3-embed`).
+`./configure --help` lists the options. The useful ones:
+
+* `--prefix=DIR`, `--bindir=DIR`, `--mandir=DIR`: installation directories.
+* `--sysconfdir=DIR`: where `ices.conf` is looked up (default `PREFIX/etc`).
+* `--with-moduledir=DIR`: playlist module directory (default
+  `SYSCONFDIR/ices/modules`).
+* `--with-examplesdir=DIR`: install the sample configuration files into DIR
+  instead of the two directories above, for packaging.
+* `--disable-python` and `--disable-perl`: leave out scripted playlists
+  (detected automatically by default). `--with-python-pkgconfig=NAME` picks the
+  pkg-config module for embedding Python, and `--with-perl=PATH` picks the Perl
+  interpreter.
+* `--without-lame`: don't use liblame to choose default output sample rates.
+
+The compiler and flags come from `CC`, `CXX`, `CFLAGS`, `CXXFLAGS`,
+`CPPFLAGS`, `LDFLAGS` and `PKG_CONFIG`, given in the environment or as
+`VAR=value` arguments. Results are logged to `config.log`.
 
 ## Quick start
 
@@ -126,8 +137,8 @@ These either fix bugs in ices0 or are unavoidable with modern libraries:
 
 ## Tests
 
-    ctest --test-dir build --output-on-failure
-    # or: python3 tests/integration_test.py build/ices [test-name ...]
+    make check
+    # or: python3 tests/integration_test.py ./ices [test-name ...]
 
 The integration suite generates test media, runs `ices` against a fake Icecast
 server (`tests/fake_icecast.py`, which speaks HTTP, x-audiocast and ICY),

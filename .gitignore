@@ -2,3 +2,7 @@ build/
 *.o
 __pycache__/
 *.swp
+/ices
+/config.mk
+/config.log
+/src/build_config.h

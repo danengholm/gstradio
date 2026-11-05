@@ -1,0 +1,341 @@
+#!/bin/sh
+# Copyright 2026 The gsradio Authors
+# SPDX-License-Identifier: GPL-2.0-or-later
+#
+# configure - detect dependencies and write config.mk and src/build_config.h.
+# Run ./configure --help for options. Written for POSIX sh.
+
+VERSION=0.2
+
+prefix=/usr/local
+exec_prefix=
+bindir=
+mandir=
+sysconfdir=
+moduledir=
+examplesdir=
+enable_python=auto
+enable_perl=auto
+with_lame=auto
+python_pc=
+perl_bin=
+
+usage() {
+    cat <<EOF
+Usage: ./configure [OPTION]... [VAR=VALUE]...
+
+Installation directories:
+  --prefix=DIR              install under DIR [/usr/local]
+  --exec-prefix=DIR         install programs under DIR [PREFIX]
+  --bindir=DIR              user programs [EPREFIX/bin]
+  --mandir=DIR              manual pages [PREFIX/share/man]
+  --sysconfdir=DIR          where ices.conf is looked up [PREFIX/etc]
+  --with-moduledir=DIR      playlist module directory [SYSCONFDIR/ices/modules]
+  --with-examplesdir=DIR    install the sample configuration files into DIR
+                            instead of SYSCONFDIR and the module directory
+
+Optional features:
+  --disable-python          no Python playlist modules [auto]
+  --with-python-pkgconfig=NAME
+                            pkg-config module for embedding Python
+                            [python3-embed, or the newest python-3.X-embed]
+  --disable-perl            no Perl playlist modules [auto]
+  --with-perl=PATH          Perl interpreter to embed [perl]
+  --without-lame            don't use liblame to pick default sample rates [auto]
+
+Influential environment variables (or VAR=VALUE arguments):
+  CC CFLAGS CXX CXXFLAGS CPPFLAGS LDFLAGS LIBS PKG_CONFIG INSTALL
+EOF
+}
+
+die() {
+    echo "configure: error: $*" >&2
+    exit 1
+}
+
+for arg in "$@"; do
+    value=${arg#*=}
+    case $arg in
+        --prefix=*) prefix=$value ;;
+        --exec-prefix=*) exec_prefix=$value ;;
+        --bindir=*) bindir=$value ;;
+        --mandir=*) mandir=$value ;;
+        --sysconfdir=*) sysconfdir=$value ;;
+        --with-moduledir=*) moduledir=$value ;;
+        --with-examplesdir=*) examplesdir=$value ;;
+        --enable-python | --enable-python=yes) enable_python=yes ;;
+        --disable-python | --enable-python=no) enable_python=no ;;
+        --with-python-pkgconfig=*) python_pc=$value ;;
+        --enable-perl | --enable-perl=yes) enable_perl=yes ;;
+        --disable-perl | --enable-perl=no) enable_perl=no ;;
+        --with-perl=*) perl_bin=$value; enable_perl=yes ;;
+        --with-lame | --with-lame=yes) with_lame=yes ;;
+        --without-lame | --with-lame=no) with_lame=no ;;
+        -h | --help) usage; exit 0 ;;
+        [A-Z]*=*)
+            name=${arg%%=*}
+            case $name in
+                *[!A-Z0-9_]*) die "invalid variable name: $name" ;;
+            esac
+            eval "$name=\$value"
+            export "$name"
+            ;;
+        --*) echo "configure: warning: ignoring unknown option $arg" >&2 ;;
+        *) die "unexpected argument: $arg (see --help)" ;;
+    esac
+done
+
+: "${exec_prefix:=$prefix}"
+: "${bindir:=$exec_prefix/bin}"
+: "${mandir:=$prefix/share/man}"
+: "${sysconfdir:=$prefix/etc}"
+: "${moduledir:=$sysconfdir/ices/modules}"
+: "${CC:=cc}"
+: "${CXX:=c++}"
+: "${CFLAGS=-O2 -g}"
+: "${CXXFLAGS=-O2 -g}"
+: "${PKG_CONFIG:=pkg-config}"
+: "${INSTALL:=install}"
+
+exec 5>config.log
+echo "# gsradio $VERSION configure log" >&5
+echo "# ./configure $*" >&5
+
+tmp=${TMPDIR:-/tmp}/gsradio-configure.$$
+mkdir "$tmp" || die "cannot create $tmp"
+trap 'rm -rf "$tmp"' EXIT HUP INT TERM
+
+checking() {
+    printf 'checking %s... ' "$1"
+    echo "## checking $1" >&5
+}
+
+result() {
+    echo "$1"
+    echo "## result: $1" >&5
+}
+
+# try_link LANG FLAGS... < source: compile and link a test program.
+try_link() {
+    lang=$1
+    shift
+    if [ "$lang" = c ]; then
+        cat >"$tmp/t.c"
+        set -- $CC $CPPFLAGS $CFLAGS "$tmp/t.c" -o "$tmp/t" $LDFLAGS "$@"
+    else
+        cat >"$tmp/t.cc"
+        set -- $CXX $CPPFLAGS $CXXFLAGS $cxx_std "$tmp/t.cc" -o "$tmp/t" $LDFLAGS "$@"
+    fi
+    echo "$*" >&5
+    "$@" >&5 2>&1
+}
+
+# ---- C++23 compiler ---------------------------------------------------------
+
+checking "for C++23 support in $CXX"
+cxx_std=
+for flag in -std=c++23 -std=c++2b ""; do
+    cxx_std=$flag
+    if try_link cxx <<'EOF'
+#include <expected>
+#include <print>
+#include <ranges>
+#include <vector>
+int main() {
+    std::vector<int> v{1, 2};
+    for (auto [i, x] : std::views::enumerate(v)) std::println("{} {}", i, x);
+    std::expected<int, int> e = 1;
+    return *e - 1;
+}
+EOF
+    then
+        break
+    fi
+    cxx_std=none
+done
+[ "$cxx_std" = none ] && { result no; die "$CXX does not support C++23 (<print>, <expected>); GCC 14 or newer is required"; }
+result "${cxx_std:-yes}"
+
+# ---- pkg-config modules -----------------------------------------------------
+
+checking "for pkg-config"
+command -v "$PKG_CONFIG" >/dev/null 2>&1 || { result no; die "pkg-config not found (set PKG_CONFIG)"; }
+result "$PKG_CONFIG"
+
+modules=
+for module in "gstreamer-1.0 >= 1.20" gstreamer-app-1.0 gstreamer-audio-1.0 gstreamer-tag-1.0 \
+    "shout >= 2.4.3" libxml-2.0; do
+    checking "for $module"
+    if $PKG_CONFIG --exists "$module" >&5 2>&1; then
+        result "yes ($($PKG_CONFIG --modversion "${module%% *}"))"
+    else
+        result no
+        die "$module not found (see config.log)"
+    fi
+    modules="$modules ${module%% *}"
+done
+pkg_cflags=$($PKG_CONFIG --cflags $modules)
+pkg_libs=$($PKG_CONFIG --libs $modules)
+
+defs=
+libs=
+optional_objs=
+
+# ---- liblame ----------------------------------------------------------------
+
+have_lame=0
+if [ "$with_lame" != no ]; then
+    checking "for liblame"
+    if try_link c -lmp3lame <<'EOF'
+#include <lame/lame.h>
+int main(void) { lame_global_flags* l = lame_init(); return l == 0; }
+EOF
+    then
+        have_lame=1
+        libs="$libs -lmp3lame"
+        result yes
+    else
+        result no
+        [ "$with_lame" = yes ] && die "liblame requested but not found"
+    fi
+fi
+defs="$defs -DICES_HAVE_LIBLAME=$have_lame"
+
+# ---- embedded Python --------------------------------------------------------
+
+have_python=0
+if [ "$enable_python" != no ]; then
+    if [ -z "$python_pc" ]; then
+        if $PKG_CONFIG --exists python3-embed 2>/dev/null; then
+            python_pc=python3-embed
+        else
+            python_pc=$($PKG_CONFIG --list-all 2>/dev/null |
+                sed -n 's/^\(python-3\.[0-9]*-embed\) .*/\1/p' | sort -t. -k2 -n | tail -n 1)
+        fi
+    fi
+    checking "for embeddable Python (${python_pc:-none})"
+    if [ -n "$python_pc" ] && $PKG_CONFIG --exists "$python_pc" 2>/dev/null &&
+        try_link cxx $($PKG_CONFIG --cflags --libs "$python_pc") <<'EOF'
+#define PY_SSIZE_T_CLEAN
+#include <Python.h>
+int main() { Py_InitializeEx(0); return Py_FinalizeEx(); }
+EOF
+    then
+        have_python=1
+        pkg_cflags="$pkg_cflags $($PKG_CONFIG --cflags "$python_pc")"
+        libs="$libs $($PKG_CONFIG --libs "$python_pc")"
+        optional_objs="$optional_objs src/playlist_python.o"
+        result yes
+    else
+        result no
+        [ "$enable_python" = yes ] && die "Python embedding requested but not usable (see config.log)"
+    fi
+fi
+defs="$defs -DICES_PYTHON_ENABLED=$have_python"
+
+# ---- embedded Perl ----------------------------------------------------------
+
+have_perl=0
+perl_cflags=
+if [ "$enable_perl" != no ]; then
+    : "${perl_bin:=perl}"
+    checking "for embeddable Perl ($perl_bin)"
+    perl_ok=no
+    if "$perl_bin" -MExtUtils::Embed -e 1 >&5 2>&1; then
+        perl_cflags=$("$perl_bin" -MExtUtils::Embed -e ccopts)
+        perl_libs=$("$perl_bin" -MExtUtils::Embed -e ldopts)
+        cat >"$tmp/perl.c" <<'EOF'
+#include <EXTERN.h>
+#include <perl.h>
+int main(void) { PerlInterpreter* p = perl_alloc(); return p == 0; }
+EOF
+        if try_link c $perl_cflags $perl_libs <"$tmp/perl.c"; then
+            perl_ok=yes
+        else
+            # No unversioned libperl.so (e.g. Debian without libperl-dev):
+            # link the shared library by its full path instead.
+            libperl=$("$perl_bin" -MConfig -e 'print $Config{libperl}')
+            for dir in $("$perl_bin" -MConfig -e 'print "$Config{archlibexp}/CORE $Config{libpth}"'); do
+                if [ -f "$dir/$libperl" ]; then
+                    perl_libs="$("$perl_bin" -MConfig -e 'print $Config{ccdlflags}') $dir/$libperl $("$perl_bin" -MConfig -e 'print $Config{perllibs}')"
+                    try_link c $perl_cflags $perl_libs <"$tmp/perl.c" && perl_ok=yes
+                    break
+                fi
+            done
+        fi
+    fi
+    if [ $perl_ok = yes ]; then
+        have_perl=1
+        libs="$libs $perl_libs"
+        optional_objs="$optional_objs src/perl_glue.o src/playlist_perl.o"
+        result yes
+    else
+        perl_cflags=
+        result no
+        [ "$enable_perl" = yes ] && die "Perl embedding requested but not usable (see config.log)"
+    fi
+fi
+defs="$defs -DICES_PERL_ENABLED=$have_perl"
+
+# ---- output -----------------------------------------------------------------
+
+if [ -n "$examplesdir" ]; then
+    conf_dist_dir=$examplesdir
+    module_dist_dir=$examplesdir
+else
+    conf_dist_dir=$sysconfdir
+    module_dist_dir=$moduledir
+fi
+
+squeeze() { echo $*; }  # collapse whitespace
+
+echo "writing config.mk"
+cat >config.mk <<EOF
+# Generated by ./configure; edit with care.
+VERSION = $VERSION
+PREFIX = $prefix
+BINDIR = $bindir
+MANDIR = $mandir
+SYSCONFDIR = $sysconfdir
+MODULEDIR = $moduledir
+CONF_DIST_DIR = $conf_dist_dir
+MODULE_DIST_DIR = $module_dist_dir
+
+CC = $CC
+CXX = $CXX
+INSTALL = $INSTALL
+CPPFLAGS = $(squeeze $CPPFLAGS)
+CFLAGS = $(squeeze $CFLAGS)
+CXXFLAGS = $(squeeze $cxx_std $CXXFLAGS)
+LDFLAGS = $(squeeze $LDFLAGS)
+DEFS = $(squeeze $defs)
+PKG_CFLAGS = $(squeeze $pkg_cflags)
+PERL_CFLAGS = $(squeeze $perl_cflags) -DICES_MODULEDIR='"$moduledir"'
+LIBS = $(squeeze $pkg_libs $libs $LIBS)
+OPTIONAL_OBJS = $(squeeze $optional_objs)
+EOF
+
+# Escape a value for use in a sed replacement.
+sed_escape() { printf '%s\n' "$1" | sed 's/[\\&|]/\\&/g'; }
+
+echo "writing src/build_config.h"
+sed -e "s|@VERSION@|$(sed_escape "$VERSION")|g" \
+    -e "s|@SYSCONFDIR@|$(sed_escape "$sysconfdir")|g" \
+    -e "s|@MODULEDIR@|$(sed_escape "$moduledir")|g" \
+    -e "s|@HAVE_PYTHON@|$([ $have_python = 1 ] && echo true || echo false)|g" \
+    -e "s|@HAVE_PERL@|$([ $have_perl = 1 ] && echo true || echo false)|g" \
+    src/build_config.h.in >src/build_config.h || die "cannot write src/build_config.h"
+
+yesno() { [ "$1" = 1 ] && echo yes || echo no; }
+cat <<EOF
+
+gsradio $VERSION configured:
+  prefix:          $prefix
+  configuration:   $sysconfdir/ices.conf
+  module dir:      $moduledir
+  liblame:         $(yesno $have_lame)
+  Python modules:  $(yesno $have_python)
+  Perl modules:    $(yesno $have_perl)
+
+Now run make (and make install).
+EOF

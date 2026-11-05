@@ -17,6 +17,12 @@ import threading
 import time
 import urllib.parse
 
+UNAUTHORIZED = (b"HTTP/1.0 401 Unauthorized\r\n"
+                b"WWW-Authenticate: Basic realm=\"Icecast2 Server\"\r\n\r\n")
+METADATA_OK = (b"<?xml version=\"1.0\"?>\n<iceresponse>"
+               b"<message>Metadata update successful</message>"
+               b"<return>1</return></iceresponse>\n")
+
 PORT = int(sys.argv[1])
 OUTDIR = sys.argv[2]
 PASSWORD = sys.argv[3] if len(sys.argv) > 3 else "hackme"
@@ -36,6 +42,7 @@ def mount_file(mount):
 
 
 class Handler(socketserver.StreamRequestHandler):
+
     def read_headers(self):
         headers = {}
         while True:
@@ -62,8 +69,11 @@ class Handler(socketserver.StreamRequestHandler):
 
     def metadata(self, query, proto):
         q = urllib.parse.parse_qs(query)
-        event("metadata", proto=proto, mount=q.get("mount", [""])[0],
-              song=q.get("song", [""])[0], mode=q.get("mode", [""])[0])
+        event("metadata",
+              proto=proto,
+              mount=q.get("mount", [""])[0],
+              song=q.get("song", [""])[0],
+              mode=q.get("mode", [""])[0])
 
     def handle(self):
         first = self.rfile.readline()
@@ -79,7 +89,7 @@ class Handler(socketserver.StreamRequestHandler):
                 base64.b64decode(auth[6:]).decode() == "source:" + PASSWORD
             if not ok:
                 event("auth_fail", mount=parts[1])
-                self.wfile.write(b"HTTP/1.0 401 Unauthorized\r\nWWW-Authenticate: Basic realm=\"Icecast2 Server\"\r\n\r\n")
+                self.wfile.write(UNAUTHORIZED)
                 return
             if headers.get("expect", "").lower() == "100-continue":
                 self.wfile.write(b"HTTP/1.1 100 Continue\r\n\r\n")
@@ -103,13 +113,14 @@ class Handler(socketserver.StreamRequestHandler):
             if path == "/admin/metadata":
                 if not headers.get("authorization"):
                     event("metadata_noauth")
-                    self.wfile.write(b"HTTP/1.0 401 Unauthorized\r\nWWW-Authenticate: Basic realm=\"Icecast2 Server\"\r\n\r\n")
+                    self.wfile.write(UNAUTHORIZED)
                     return
                 self.metadata(query, "http")
             elif path in ("/admin.cgi", "/admin"):
                 self.metadata(query, "icy")
-            body = b"<?xml version=\"1.0\"?>\n<iceresponse><message>Metadata update successful</message><return>1</return></iceresponse>\n"
-            self.wfile.write(b"HTTP/1.0 200 OK\r\nContent-Type: text/xml\r\nContent-Length: %d\r\n\r\n" % len(body) + body)
+            body = METADATA_OK
+            self.wfile.write(b"HTTP/1.0 200 OK\r\nContent-Type: text/xml\r\n"
+                             b"Content-Length: %d\r\n\r\n" % len(body) + body)
         elif line == PASSWORD:  # ICY: password line, then headers
             self.wfile.write(b"OK2\r\nicy-caps:11\r\n\r\n")
             self.wfile.flush()
@@ -117,7 +128,8 @@ class Handler(socketserver.StreamRequestHandler):
             self.receive("/icy", headers, "icy")
         elif parts[0] == "OPTIONS":
             self.read_headers()
-            self.wfile.write(b"HTTP/1.1 204 No Content\r\nAllow: GET, PUT, SOURCE, OPTIONS\r\n\r\n")
+            self.wfile.write(b"HTTP/1.1 204 No Content\r\n"
+                             b"Allow: GET, PUT, SOURCE, OPTIONS\r\n\r\n")
         else:
             event("bad_request", line=line)
             self.wfile.write(b"HTTP/1.0 400 Bad Request\r\n\r\n")

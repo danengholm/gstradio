@@ -131,6 +131,27 @@ and checks titles, formats, durations, real-time pacing, crossfade shape,
 signals, daemon mode, stdin input and error handling. It needs
 `gst-launch-1.0`, `ffmpeg`/`ffprobe` and, for the crossfade check, numpy.
 
+## Code style
+
+The code follows the [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)
+and the [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html), with two
+project-wide changes: **4-space indentation** and a **120 column** line limit. C++23 library
+features such as `std::expected` and `std::print` are used.
+
+The settings live in `.clang-format`, `.style.yapf` and `CPPLINT.cfg`:
+
+    clang-format -i src/*.cc src/*.h src/*.c
+    cpplint src/*
+    yapf -i tests/*.py tests/modules/*.py
+
+`CPPLINT.cfg` turns off two checks that misfire on modern C++: cpplint reads
+clang-format's aligned array initializers as namespace indentation, and it reports
+`if (init; condition) statement;` as having multiple statements.
+
+The function names `ices_init`, `ices_get_next`, … in the playlist modules are IceS's
+public scripting API and are kept as they are. The Perl glue (`src/perl_glue.c`) is C
+and uses C naming.
+
 ## License
 
 GPL-2.0-or-later (see `COPYING`). Parts of this program (MP3 header parsing

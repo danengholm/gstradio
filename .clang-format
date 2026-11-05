@@ -1,0 +1,8 @@
+# Google C++ style (https://google.github.io/styleguide/cppguide.html),
+# with 4-space indentation and a 120 column limit.
+BasedOnStyle: Google
+Standard: Latest
+IndentWidth: 4
+ColumnLimit: 120
+# Access specifiers are indented one space, as the Google guide requires.
+AccessModifierOffset: -3

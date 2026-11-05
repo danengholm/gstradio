@@ -25,8 +25,8 @@ MODULES = os.path.join(HERE, "modules")
 PASSWORD = "hackme"
 failures = []
 
-
 # ---------------------------------------------------------------- helpers
+
 
 def sh(*args, **kw):
     return subprocess.run(args, check=True, capture_output=True, text=True, **kw)
@@ -47,11 +47,13 @@ def free_port():
 
 
 class Server:
+
     def __init__(self, name):
         self.port = free_port()
         self.dir = os.path.join(WORK, name)
         self.proc = subprocess.Popen(
-            [sys.executable, os.path.join(HERE, "fake_icecast.py"), str(self.port), self.dir, PASSWORD])
+            [sys.executable, os.path.join(HERE, "fake_icecast.py"),
+             str(self.port), self.dir, PASSWORD])
         for _ in range(50):
             try:
                 socket.create_connection(("127.0.0.1", self.port), 0.1).close()
@@ -80,8 +82,12 @@ class Server:
 
 def run_ices(args, timeout=60, env=None, cwd=None, sig_after=None):
     full_env = dict(os.environ, ICES_TEST_MEDIA=MEDIA, **(env or {}))
-    p = subprocess.Popen([ICES] + args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                         text=True, env=full_env, cwd=cwd or WORK)
+    p = subprocess.Popen([ICES] + args,
+                         stdout=subprocess.PIPE,
+                         stderr=subprocess.STDOUT,
+                         text=True,
+                         env=full_env,
+                         cwd=cwd or WORK)
     if sig_after:
         delay, sig = sig_after
         time.sleep(delay)
@@ -96,14 +102,17 @@ def run_ices(args, timeout=60, env=None, cwd=None, sig_after=None):
 
 def probe(path):
     """(sample_rate, channels, bit_rate, decoded seconds, decode error lines)"""
-    info = json.loads(sh("ffprobe", "-v", "error", "-show_entries",
-                         "stream=sample_rate,channels,bit_rate", "-of", "json", path).stdout)["streams"][0]
+    info = json.loads(
+        sh("ffprobe", "-v", "error", "-show_entries", "stream=sample_rate,channels,bit_rate", "-of", "json",
+           path).stdout)["streams"][0]
     dec = subprocess.run(["ffmpeg", "-v", "error", "-stats", "-i", path, "-f", "null", "-"],
-                         capture_output=True, text=True)
+                         capture_output=True,
+                         text=True)
     times = [t for t in dec.stderr.replace("\r", "\n").split() if t.startswith("time=")]
     h, m, s = times[-1][5:].split(":")
     errors = [l for l in dec.stderr.splitlines() if l and "time=" not in l and "size=" not in l]
-    return int(info["sample_rate"]), int(info["channels"]), int(info.get("bit_rate", 0)), \
+    return int(info["sample_rate"]), int(info["channels"]), \
+        int(info.get("bit_rate", 0)), \
         int(h) * 3600 + int(m) * 60 + float(s), errors
 
 
@@ -118,11 +127,14 @@ def media(name):
 
 def scripted(files):
     """Arguments + env for the 'play these files once' python playlist."""
-    return ["-S", "python", "-M", "listpl"], {"ICES_TEST_LIST": ":".join(media(f) for f in files),
-                                              "PYTHONPATH": MODULES}
+    return ["-S", "python", "-M", "listpl"], {
+        "ICES_TEST_LIST": ":".join(media(f) for f in files),
+        "PYTHONPATH": MODULES
+    }
 
 
 # ------------------------------------------------------------------ media
+
 
 def make_media():
     os.makedirs(MEDIA)
@@ -132,29 +144,31 @@ def make_media():
 
     def tag(name, artist, title):
         tmp = media("tmp_" + name)
-        sh("ffmpeg", "-v", "error", "-y", "-i", media(name), "-c", "copy",
-           "-metadata", f"artist={artist}", "-metadata", f"title={title}", tmp)
+        sh("ffmpeg", "-v", "error", "-y", "-i", media(name), "-c", "copy", "-metadata", f"artist={artist}", "-metadata",
+           f"title={title}", tmp)
         os.replace(tmp, media(name))
 
-    src = "audiotestsrc num-buffers={n} freq={f} ! audio/x-raw,rate={r},channels={c}"
-    gst(src.format(n=130, f=440, r=44100, c=2) +
-        " ! lamemp3enc target=bitrate bitrate=128 cbr=true ! filesink", "mp3_128.mp3")
+    src = ("audiotestsrc num-buffers={n} freq={f} ! "
+           "audio/x-raw,rate={r},channels={c}")
+    gst(
+        src.format(n=130, f=440, r=44100, c=2) + " ! lamemp3enc target=bitrate bitrate=128 cbr=true ! filesink",
+        "mp3_128.mp3")
     tag("mp3_128.mp3", "Artist A", "Sine MP3")
-    gst(src.format(n=130, f=550, r=48000, c=2) + " ! audioconvert ! vorbisenc ! oggmux ! filesink",
-        "vorbis.ogg")
+    gst(src.format(n=130, f=550, r=48000, c=2) + " ! audioconvert ! vorbisenc ! oggmux ! filesink", "vorbis.ogg")
     tag("vorbis.ogg", "Artist C", "Vorbis Tone")
     gst(src.format(n=130, f=660, r=44100, c=1) + " ! audioconvert ! flacenc ! filesink", "mono.flac")
     tag("mono.flac", "Artist D", "FLAC Mono")
-    gst(src.format(n=65, f=330, r=22050, c=2) +
-        " ! lamemp3enc target=quality quality=4 ! xingmux ! filesink", "vbr22k.mp3")
+    gst(
+        src.format(n=65, f=330, r=22050, c=2) + " ! lamemp3enc target=quality quality=4 ! xingmux ! filesink",
+        "vbr22k.mp3")
     for i in (1, 2):
-        gst(src.format(n=560, f=200 * i, r=44100, c=2) + " ! audioconvert ! flacenc ! filesink",
-            f"long{i}.flac")
+        gst(src.format(n=560, f=200 * i, r=44100, c=2) + " ! audioconvert ! flacenc ! filesink", f"long{i}.flac")
     with open(media("junk.mp3"), "w") as f:
         f.write("this is not audio\n" * 20)
 
 
 # ------------------------------------------------------------------ tests
+
 
 def test_transcode_formats():
     """MP3, Ogg Vorbis and FLAC transcoded into one continuous MP3 stream."""
@@ -162,15 +176,16 @@ def test_transcode_formats():
     try:
         args, env = scripted(["mp3_128.mp3", "vorbis.ogg", "mono.flac"])
         t0 = time.time()
-        rc, out = run_ices(args + ["-D", WORK, "-p", str(srv.port), "-P", PASSWORD,
-                                   "-m", "/t", "-R", "-b", "96"], env=env)
+        rc, out = run_ices(
+            args + ["-D", WORK, "-p", str(srv.port), "-P", PASSWORD, "-m", "/t", "-R", "-b", "96"], env=env)
         elapsed = time.time() - t0
     finally:
         srv.stop()
     check(rc == 0, f"exit status {rc}\n{out}")
     check("Playlist file name is empty, shutting down." in out, out)
-    check(srv.titles("/t") == ["Artist A - Sine MP3", "Artist C - Vorbis Tone", "Artist D - FLAC Mono"],
-          f"titles {srv.titles('/t')}")
+    check(
+        srv.titles("/t") == ["Artist A - Sine MP3", "Artist C - Vorbis Tone", "Artist D - FLAC Mono"],
+        f"titles {srv.titles('/t')}")
     rate, ch, br, secs, errors = probe(srv.file("/t"))
     # 96 kbps stereo: LAME (and so IceS) resamples 44.1 kHz input to 32 kHz.
     check((rate, ch, br) == (32000, 2, 96000), f"format {(rate, ch, br)}")
@@ -180,24 +195,31 @@ def test_transcode_formats():
 
 
 def test_multi_stream_protocols():
-    """Pass-through + lazy reencoding + mono low bitrate over http/xaudiocast/icy."""
+    """Pass-through, lazy reencoding and mono low bitrate; three protocols."""
     srv = Server("multi")
     conf = os.path.join(WORK, "multi.conf")
+    server = (f"<Server><Hostname>127.0.0.1</Hostname>"
+              f"<Port>{srv.port}</Port><Password>{PASSWORD}</Password>"
+              "{protocol}</Server>")
+
+    def stream(protocol, body):
+        proto = f"<Protocol>{protocol}</Protocol>" if protocol else ""
+        return f"<Stream>{server.format(protocol=proto)}{body}</Stream>\n"
+
     with open(conf, "w") as f:
-        f.write(f"""<?xml version="1.0"?>
-<ices:Configuration xmlns:ices="http://www.icecast.org/projects/ices">
-  <Playlist><Type>python</Type><Module>listpl</Module></Playlist>
-  <Execution><BaseDirectory>{WORK}</BaseDirectory><Verbose>1</Verbose></Execution>
-  <Stream><Server><Hostname>127.0.0.1</Hostname><Port>{srv.port}</Port><Password>{PASSWORD}</Password></Server>
-    <Mountpoint>/raw</Mountpoint><Name>Raw &amp; Ready</Name><Bitrate>128</Bitrate><Reencode>0</Reencode></Stream>
-  <Stream><Server><Hostname>127.0.0.1</Hostname><Port>{srv.port}</Port><Password>{PASSWORD}</Password>
-      <Protocol>xaudiocast</Protocol></Server>
-    <Mountpoint>/lazy</Mountpoint><Bitrate>128</Bitrate><Reencode>1</Reencode></Stream>
-  <Stream><Server><Hostname>127.0.0.1</Hostname><Port>{srv.port}</Port><Password>{PASSWORD}</Password>
-      <Protocol>icy</Protocol></Server>
-    <Bitrate>32</Bitrate><Reencode>1</Reencode><Channels>1</Channels></Stream>
-</ices:Configuration>
-""")
+        f.write('<?xml version="1.0"?>\n'
+                '<ices:Configuration '
+                'xmlns:ices="http://www.icecast.org/projects/ices">\n'
+                "<Playlist><Type>python</Type><Module>listpl</Module></Playlist>\n"
+                f"<Execution><BaseDirectory>{WORK}</BaseDirectory>"
+                "<Verbose>1</Verbose></Execution>\n" + stream(
+                    None, "<Mountpoint>/raw</Mountpoint>"
+                    "<Name>Raw &amp; Ready</Name><Bitrate>128</Bitrate>"
+                    "<Reencode>0</Reencode>") +
+                stream("xaudiocast", "<Mountpoint>/lazy</Mountpoint>"
+                       "<Bitrate>128</Bitrate><Reencode>1</Reencode>") +
+                stream("icy", "<Bitrate>32</Bitrate><Reencode>1</Reencode>"
+                       "<Channels>1</Channels>") + "</ices:Configuration>\n")
     try:
         _, env = scripted(["mp3_128.mp3", "vorbis.ogg", "vbr22k.mp3", "mp3_128.mp3"])
         rc, out = run_ices(["-c", conf], env=env)
@@ -228,14 +250,13 @@ def test_crossfade():
     srv = Server("xfade")
     try:
         args, env = scripted(["long1.flac", "long2.flac"])
-        rc, out = run_ices(args + ["-D", WORK, "-p", str(srv.port), "-P", PASSWORD,
-                                   "-m", "/xf", "-R", "-C", "3"], env=env)
+        rc, out = run_ices(
+            args + ["-D", WORK, "-p", str(srv.port), "-P", PASSWORD, "-m", "/xf", "-R", "-C", "3"], env=env)
     finally:
         srv.stop()
     check(rc == 0, f"exit status {rc}\n{out}")
     wav = os.path.join(WORK, "xf.raw")
-    sh("ffmpeg", "-v", "error", "-y", "-i", srv.file("/xf"), "-ac", "1", "-ar", "8000",
-       "-f", "s16le", wav)
+    sh("ffmpeg", "-v", "error", "-y", "-i", srv.file("/xf"), "-ac", "1", "-ar", "8000", "-f", "s16le", wav)
     try:
         import numpy as np
     except ImportError:
@@ -259,17 +280,19 @@ def test_crossfade():
 
 
 def test_perl_playlist():
-    """Perl module: title override, undef falls back to tags, XS modules load."""
+    """Perl module: title override, undef falls back to tags, XS loading."""
     srv = Server("perl")
     try:
-        rc, out = run_ices(["-D", WORK, "-S", "perl", "-M", "testpl", "-p", str(srv.port),
-                            "-P", PASSWORD, "-m", "/pl", "-R"], cwd=MODULES, timeout=4.5,
-                           env={"ICES_TEST_LIST": media("mono.flac") + ":" + media("mp3_128.mp3")})
+        rc, out = run_ices(
+            ["-D", WORK, "-S", "perl", "-M", "testpl", "-p",
+             str(srv.port), "-P", PASSWORD, "-m", "/pl", "-R"],
+            cwd=MODULES,
+            timeout=4.5,
+            env={"ICES_TEST_LIST": media("mono.flac") + ":" + media("mp3_128.mp3")})
     finally:
         srv.stop()
     check("pl: ices_init" in out and "pl: ices_shutdown" in out, out)
-    check(srv.titles("/pl")[:2] == ["Perl Override 1", "Artist A - Sine MP3"],
-          f"titles {srv.titles('/pl')}")
+    check(srv.titles("/pl")[:2] == ["Perl Override 1", "Artist A - Sine MP3"], f"titles {srv.titles('/pl')}")
 
 
 def test_signals_and_daemon():
@@ -281,8 +304,7 @@ def test_signals_and_daemon():
     with open(pl, "w") as f:
         f.write(f"{media('long1.flac')}\n{media('mp3_128.mp3')}\n")
     try:
-        rc, out = run_ices(["-B", "-v", "-D", base, "-F", pl, "-p", str(srv.port), "-P", PASSWORD,
-                            "-m", "/sig", "-R"])
+        rc, out = run_ices(["-B", "-v", "-D", base, "-F", pl, "-p", str(srv.port), "-P", PASSWORD, "-m", "/sig", "-R"])
         check(rc == 0 and "Into the land of the dreaded daemons" in out, out)
         time.sleep(1.5)
         pid = int(open(os.path.join(base, "ices.pid")).read())
@@ -341,8 +363,11 @@ def test_stdin():
         f.write("-\n")
     try:
         with open(media("vorbis.ogg"), "rb") as stdin:
-            p = subprocess.run([ICES, "-D", WORK, "-F", pl, "-p", str(srv.port), "-P", PASSWORD,
-                                "-m", "/in", "-R"], stdin=stdin, capture_output=True, text=True,
+            p = subprocess.run([ICES, "-D", WORK, "-F", pl, "-p",
+                                str(srv.port), "-P", PASSWORD, "-m", "/in", "-R"],
+                               stdin=stdin,
+                               capture_output=True,
+                               text=True,
                                timeout=60)
     finally:
         srv.stop()
@@ -381,7 +406,8 @@ if __name__ == "__main__":
             failures.append(name)
             print(f"FAIL  {name}: {e}")
     if failures:
-        print(f"\n{len(failures)} failed: {' '.join(failures)} (artifacts in {WORK})")
+        print(f"\n{len(failures)} failed: {' '.join(failures)} "
+              f"(artifacts in {WORK})")
         sys.exit(1)
     shutil.rmtree(WORK, ignore_errors=True)
     print("\nall tests passed")

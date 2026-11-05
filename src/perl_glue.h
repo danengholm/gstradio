@@ -1,6 +1,9 @@
+// Copyright 2026 The gsradio Authors
+// SPDX-License-Identifier: GPL-2.0-or-later
+
 /* C interface to the embedded Perl interpreter (Perl's headers are C only). */
-#ifndef ICES_PERL_GLUE_H
-#define ICES_PERL_GLUE_H
+#ifndef GSRADIO_SRC_PERL_GLUE_H_
+#define GSRADIO_SRC_PERL_GLUE_H_
 
 #include <stddef.h>
 
@@ -26,4 +29,4 @@ void ices_perl_term(void);
 }
 #endif
 
-#endif
+#endif  // GSRADIO_SRC_PERL_GLUE_H_

@@ -29,25 +29,26 @@ pkg_check_modules(SHOUT  REQUIRED IMPORTED_TARGET shout>=2.4.3)
 pkg_check_modules(LIBXML REQUIRED IMPORTED_TARGET libxml-2.0)
 
 add_executable(ices
-  src/main.cpp
-  src/config.cpp
-  src/log.cpp
-  src/signals.cpp
-  src/mp3.cpp
-  src/source.cpp
-  src/decoder.cpp
-  src/encoder.cpp
-  src/crossfade.cpp
-  src/shout_stream.cpp
-  src/metadata.cpp
-  src/cue.cpp
-  src/streamer.cpp
-  src/playlist.cpp
-  src/playlist_builtin.cpp
+  src/main.cc
+  src/config.cc
+  src/log.cc
+  src/signals.cc
+  src/mp3.cc
+  src/source.cc
+  src/decoder.cc
+  src/encoder.cc
+  src/crossfade.cc
+  src/shout_stream.cc
+  src/metadata.cc
+  src/cue.cc
+  src/streamer.cc
+  src/playlist.cc
+  src/playlist_builtin.cc
 )
 
 target_link_libraries(ices PRIVATE PkgConfig::GST PkgConfig::SHOUT PkgConfig::LIBXML)
-target_include_directories(ices PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated" src)
+# Project headers are included by their path from the repository root.
+target_include_directories(ices PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}")
 target_compile_options(ices PRIVATE
   $<$<COMPILE_LANGUAGE:CXX>:-Wall -Wextra -Wpedantic -Wno-missing-field-initializers>)
 
@@ -69,7 +70,7 @@ if(ICES_WITH_PYTHON)
   pkg_check_modules(PYEMBED IMPORTED_TARGET python3-embed)
   if(PYEMBED_FOUND)
     set(ICES_HAVE_PYTHON 1)
-    target_sources(ices PRIVATE src/playlist_python.cpp)
+    target_sources(ices PRIVATE src/playlist_python.cc)
     target_link_libraries(ices PRIVATE PkgConfig::PYEMBED)
     message(STATUS "Python playlist support: yes (${PYEMBED_VERSION})")
   else()
@@ -101,8 +102,9 @@ if(ICES_WITH_PERL)
       add_library(ices_perl_glue STATIC src/perl_glue.c)
       target_compile_options(ices_perl_glue PRIVATE ${PERL_CCOPTS_LIST} -w)
       target_compile_definitions(ices_perl_glue PRIVATE ICES_MODULEDIR="${ICES_MODULEDIR}")
+      target_include_directories(ices_perl_glue PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
       target_link_libraries(ices_perl_glue PUBLIC ${PERL_LIBRARY} ${PERL_SYSLIBS_LIST})
-      target_sources(ices PRIVATE src/playlist_perl.cpp)
+      target_sources(ices PRIVATE src/playlist_perl.cc)
       target_link_libraries(ices PRIVATE ices_perl_glue)
       # Export symbols so XS modules loaded by DynaLoader can resolve libperl.
       target_link_options(ices PRIVATE -Wl,-E)
@@ -116,7 +118,7 @@ endif()
 target_compile_definitions(ices PRIVATE
   ICES_PYTHON_ENABLED=${ICES_HAVE_PYTHON} ICES_PERL_ENABLED=${ICES_HAVE_PERL})
 
-configure_file(src/build_config.hpp.in "${CMAKE_CURRENT_BINARY_DIR}/generated/build_config.hpp" @ONLY)
+configure_file(src/build_config.h.in "${CMAKE_CURRENT_BINARY_DIR}/src/build_config.h" @ONLY)
 
 install(TARGETS ices RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(FILES conf/ices.conf.dist DESTINATION ${CMAKE_INSTALL_SYSCONFDIR})

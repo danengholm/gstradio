@@ -20,7 +20,7 @@
 #include "src/log.h"
 #include "src/playlist.h"
 
-namespace ices {
+namespace gsradio {
 namespace {
 
 class BuiltinPlaylist final : public Playlist {
@@ -126,4 +126,4 @@ std::expected<std::unique_ptr<Playlist>, std::string> MakeBuiltinPlaylist(const 
     return pl;
 }
 
-}  // namespace ices
+}  // namespace gsradio

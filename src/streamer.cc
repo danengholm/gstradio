@@ -16,7 +16,7 @@
 #include "src/log.h"
 #include "src/signals.h"
 
-namespace ices {
+namespace gsradio {
 namespace {
 
 using Clock = std::chrono::steady_clock;
@@ -477,4 +477,4 @@ Streamer::Result Streamer::Play(InputSource& src, std::string& error) {
     return Result::kOk;
 }
 
-}  // namespace ices
+}  // namespace gsradio

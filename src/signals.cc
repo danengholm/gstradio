@@ -8,7 +8,7 @@
 #include <csignal>
 #include <thread>
 
-namespace ices::signals {
+namespace gsradio::signals {
 namespace {
 
 std::atomic<bool> g_quit{false};
@@ -57,4 +57,4 @@ void InterruptibleSleep(std::chrono::milliseconds duration) {
     }
 }
 
-}  // namespace ices::signals
+}  // namespace gsradio::signals

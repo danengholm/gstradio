@@ -22,7 +22,7 @@
 #include <string>
 #include <vector>
 
-namespace ices {
+namespace gsradio {
 
 struct TrackTags {
     std::string artist;
@@ -82,6 +82,6 @@ class InputSource {
     TrackTags tags_;
 };
 
-}  // namespace ices
+}  // namespace gsradio
 
 #endif  // GSRADIO_SRC_SOURCE_H_

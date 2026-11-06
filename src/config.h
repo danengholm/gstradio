@@ -15,7 +15,7 @@
 #include <string_view>
 #include <vector>
 
-namespace ices {
+namespace gsradio {
 
 enum class Protocol { kHttp, kXaudiocast, kIcy };
 enum class PlaylistType { kBuiltin, kPython, kPerl };
@@ -30,7 +30,7 @@ struct StreamConfig {
     std::string password = "letmein";
     Protocol protocol = Protocol::kHttp;
     // Stream
-    std::string mount = "/ices";
+    std::string mount = "/gsradio";
     std::optional<std::string> dumpfile;
     std::string name = "Default stream name";
     std::string genre = "Default genre";
@@ -48,12 +48,12 @@ struct PlaylistConfig {
     PlaylistType type = PlaylistType::kBuiltin;
     bool randomize = false;
     std::string file = "playlist.txt";
-    std::string module = "ices";
+    std::string module = "gsradio";
     int crossfade = 0;  // seconds, 0 = disabled
 };
 
 struct Config {
-    std::string configfile = "ices.conf";
+    std::string configfile = "gsradio.conf";
     bool daemon = false;
     int verbose = 0;
     std::string base_directory = "/tmp";
@@ -81,6 +81,6 @@ void PrintVersion();
 // Log the effective configuration in verbose mode.
 void LogConfig(const Config& config);
 
-}  // namespace ices
+}  // namespace gsradio
 
 #endif  // GSRADIO_SRC_CONFIG_H_

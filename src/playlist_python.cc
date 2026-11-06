@@ -3,16 +3,13 @@
 
 // Embedded Python playlist module (IceS 0.4 pm_python.c, for Python 3).
 //
-// The module (default "ices") is imported from PYTHONPATH, the playlist
+// The module (default "gsradio") is imported from PYTHONPATH, the playlist
 // module directory and the current directory. Functions:
-//   ices_get_next()      required, returns the next file name
-//   ices_init()          optional, a negative result aborts startup
-//   ices_shutdown()      optional
-//   ices_get_metadata()  optional, returns a title override (or None)
-//   ices_get_lineno()    optional, returns the line number for the cue file
-// The pre-0.2.1 names ices_python_initialize, ices_python_shutdown,
-// ices_python_get_next, ices_python_get_metadata and
-// ices_python_get_current_lineno are accepted as fallbacks.
+//   gsradio_get_next()      required, returns the next file name
+//   gsradio_init()          optional, a negative result aborts startup
+//   gsradio_shutdown()      optional
+//   gsradio_get_metadata()  optional, returns a title override (or None)
+//   gsradio_get_lineno()    optional, returns the line number for the cue file
 // Python.h must be included before any standard header.
 // clang-format off
 #define PY_SSIZE_T_CLEAN
@@ -29,7 +26,7 @@
 #include "src/log.h"
 #include "src/playlist.h"
 
-namespace ices {
+namespace gsradio {
 namespace {
 
 // Owns one reference to a Python object.
@@ -75,17 +72,17 @@ class PythonPlaylist final : public Playlist {
         }
         FindHooks();
         if (!get_next_) {
-            return std::unexpected("The playlist module must define at least the ices_get_next method");
+            return std::unexpected("The playlist module must define at least the gsradio_get_next method");
         }
 
         if (init_) {
             PyRef res = Call(init_);
             if (res && PyLong_Check(res.get())) {
                 if (const int64_t rc = PyLong_AsLongLong(res.get()); rc < 0) {
-                    return std::unexpected(std::format("ices_init failed (returned {})", rc));
+                    return std::unexpected(std::format("gsradio_init failed (returned {})", rc));
                 }
             } else {
-                log::Info("ices_init failed");
+                log::Info("gsradio_init failed");
             }
         }
         return {};
@@ -94,7 +91,7 @@ class PythonPlaylist final : public Playlist {
     std::optional<std::string> Next() override {
         PyRef res = Call(get_next_);
         if (auto s = AsString(res)) return s;
-        log::Info("ices_get_next failed");
+        log::Info("gsradio_get_next failed");
         return std::nullopt;
     }
 
@@ -103,7 +100,7 @@ class PythonPlaylist final : public Playlist {
         PyRef res = Call(get_metadata_);
         if (res && res.get() == Py_None) return std::nullopt;
         auto s = AsString(res);
-        if (!s) log::Info("ices_get_metadata failed");
+        if (!s) log::Info("gsradio_get_metadata failed");
         return s;
     }
 
@@ -113,7 +110,7 @@ class PythonPlaylist final : public Playlist {
         if (res && PyLong_Check(res.get())) {
             return static_cast<int>(PyLong_AsLong(res.get()));
         }
-        log::Info("ices_get_lineno failed");
+        log::Info("gsradio_get_lineno failed");
         return 0;
     }
 
@@ -132,7 +129,7 @@ class PythonPlaylist final : public Playlist {
     void Shutdown() override {
         if (module_ && shutdown_) {
             PyRef res = Call(shutdown_);
-            if (!res) log::Info("ices_shutdown failed");
+            if (!res) log::Info("gsradio_shutdown failed");
         }
         Finalize();
     }
@@ -149,23 +146,18 @@ class PythonPlaylist final : public Playlist {
         setenv("PYTHONPATH", path.c_str(), 1);
     }
 
-    const char* FindAttr(const char* name, const char* legacy) {
-        const char* found = nullptr;
-        if (PyObject_HasAttrString(module_.get(), name)) {
-            found = name;
-        } else if (PyObject_HasAttrString(module_.get(), legacy)) {
-            found = legacy;
-        }
-        if (found) log::Debug("Found method: {}", found);
-        return found;
+    const char* FindAttr(const char* name) {
+        if (!PyObject_HasAttrString(module_.get(), name)) return nullptr;
+        log::Debug("Found method: {}", name);
+        return name;
     }
 
     void FindHooks() {
-        init_ = FindAttr("ices_init", "ices_python_initialize");
-        shutdown_ = FindAttr("ices_shutdown", "ices_python_shutdown");
-        get_next_ = FindAttr("ices_get_next", "ices_python_get_next");
-        get_metadata_ = FindAttr("ices_get_metadata", "ices_python_get_metadata");
-        get_lineno_ = FindAttr("ices_get_lineno", "ices_python_get_current_lineno");
+        init_ = FindAttr("gsradio_init");
+        shutdown_ = FindAttr("gsradio_shutdown");
+        get_next_ = FindAttr("gsradio_get_next");
+        get_metadata_ = FindAttr("gsradio_get_metadata");
+        get_lineno_ = FindAttr("gsradio_get_lineno");
     }
 
     PyRef Call(const char* function) {
@@ -216,4 +208,4 @@ std::expected<std::unique_ptr<Playlist>, std::string> MakePythonPlaylist(const P
     return pl;
 }
 
-}  // namespace ices
+}  // namespace gsradio

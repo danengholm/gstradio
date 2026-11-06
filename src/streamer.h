@@ -31,7 +31,7 @@
 #include "src/shout_stream.h"
 #include "src/source.h"
 
-namespace ices {
+namespace gsradio {
 
 class Streamer {
  public:
@@ -90,6 +90,6 @@ class Streamer {
     std::string song_;  // Current title.
 };
 
-}  // namespace ices
+}  // namespace gsradio
 
 #endif  // GSRADIO_SRC_STREAMER_H_

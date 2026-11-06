@@ -10,7 +10,7 @@
 #include <memory>
 #include <string>
 
-namespace ices::gst {
+namespace gsradio::gst {
 
 struct ObjectUnref {
     void operator()(gpointer p) const {
@@ -86,6 +86,6 @@ inline std::string MessageText(GstMessage* msg) {
     return text;
 }
 
-}  // namespace ices::gst
+}  // namespace gsradio::gst
 
 #endif  // GSRADIO_SRC_GST_UTIL_H_

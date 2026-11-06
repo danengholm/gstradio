@@ -28,7 +28,7 @@
 #include "src/gst_util.h"
 #include "src/source.h"
 
-namespace ices {
+namespace gsradio {
 
 class Decoder {
  public:
@@ -68,6 +68,6 @@ class Decoder {
     int bitrate_kbps_ = 0;
 };
 
-}  // namespace ices
+}  // namespace gsradio
 
 #endif  // GSRADIO_SRC_DECODER_H_

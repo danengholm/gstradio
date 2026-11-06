@@ -4,7 +4,7 @@
 // Title streaming (IceS 0.4 metadata.c).
 //
 // The song title is, in order of preference: the playlist module's
-// ices_get_metadata() result, "Artist - Title" / "Title" from the file's
+// gsradio_get_metadata() result, "Artist - Title" / "Title" from the file's
 // tags, or the file name without directory and extension.
 //
 // Updates are sent from a background thread (the original forked) so a slow
@@ -26,7 +26,7 @@
 #include "src/config.h"
 #include "src/source.h"
 
-namespace ices {
+namespace gsradio {
 
 [[nodiscard]] std::string CleanFilename(std::string_view path);
 [[nodiscard]] std::string ComposeSongTitle(const std::optional<std::string>& playlist_metadata, const TrackTags& tags,
@@ -57,6 +57,6 @@ class MetadataUpdater {
     std::jthread worker_;           // last: started after the members above exist
 };
 
-}  // namespace ices
+}  // namespace gsradio
 
 #endif  // GSRADIO_SRC_METADATA_H_

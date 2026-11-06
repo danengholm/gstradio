@@ -12,7 +12,7 @@
 
 #include "src/log.h"
 
-namespace ices {
+namespace gsradio {
 namespace {
 
 // Keep at most this much compressed data queued in front of the decoder.
@@ -137,4 +137,4 @@ std::optional<double> Decoder::QueryDurationSeconds() const {
     return std::nullopt;
 }
 
-}  // namespace ices
+}  // namespace gsradio

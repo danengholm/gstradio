@@ -11,7 +11,7 @@
 
 #include "src/log.h"
 
-namespace ices {
+namespace gsradio {
 namespace {
 
 std::string FileTime(int bitrate, std::uint64_t filesize) {
@@ -51,4 +51,4 @@ void CueFile::Remove() {
     std::filesystem::remove(path_, ec);
 }
 
-}  // namespace ices
+}  // namespace gsradio

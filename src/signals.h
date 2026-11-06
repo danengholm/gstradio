@@ -12,7 +12,7 @@
 
 #include <chrono>
 
-namespace ices::signals {
+namespace gsradio::signals {
 
 void Install();
 
@@ -26,6 +26,6 @@ void RequestQuit();
 // Sleep for up to `duration`, returning early if a shutdown is requested.
 void InterruptibleSleep(std::chrono::milliseconds duration);
 
-}  // namespace ices::signals
+}  // namespace gsradio::signals
 
 #endif  // GSRADIO_SRC_SIGNALS_H_

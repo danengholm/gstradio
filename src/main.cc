@@ -1,7 +1,7 @@
 // Copyright 2026 The gsradio Authors
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-// ices - stream MP3 audio to an Icecast server.
+// gsradio - stream MP3 audio to an Icecast server.
 // A C++23/GStreamer reimplementation of IceS 0.4 (ices0), including its
 // on-the-fly transcoding of Ogg Vorbis, FLAC and MP3 to MP3.
 #include <fcntl.h>
@@ -20,11 +20,11 @@
 #include "src/signals.h"
 #include "src/streamer.h"
 
-namespace ices {
+namespace gsradio {
 namespace {
 
 std::filesystem::path PidfilePath(const Config& config) {
-    return std::filesystem::path(config.base_directory) / "ices.pid";
+    return std::filesystem::path(config.base_directory) / "gsradio.pid";
 }
 
 // Detaches from the terminal. The parent reports the child's pid and exits.
@@ -103,7 +103,7 @@ int Main(int argc, char** argv) {
 
     const int status = Stream(*config);
 
-    log::Info("Ices Exiting...");
+    log::Info("gsradio exiting...");
     log::Close();
     if (config->daemon) {
         std::error_code ec;
@@ -115,6 +115,6 @@ int Main(int argc, char** argv) {
 }
 
 }  // namespace
-}  // namespace ices
+}  // namespace gsradio
 
-int main(int argc, char** argv) { return ices::Main(argc, argv); }
+int main(int argc, char** argv) { return gsradio::Main(argc, argv); }

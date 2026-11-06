@@ -23,7 +23,7 @@
 #include "src/build_config.h"
 #include "src/log.h"
 
-namespace ices {
+namespace gsradio {
 
 std::string_view ToString(Protocol p) {
     switch (p) {
@@ -53,7 +53,7 @@ bool Config::AnyReencode() const { return std::ranges::any_of(streams, &StreamCo
 
 namespace {
 
-constexpr std::string_view kIcesNamespace = "http://www.icecast.org/projects/ices";
+constexpr std::string_view kConfigNamespace = "https://github.com/danengholm/gsradio";
 
 // atoi() semantics (leading whitespace, optional sign, trailing junk ignored,
 // 0 on failure) to stay compatible with existing configuration files.
@@ -366,8 +366,8 @@ std::expected<void, std::string> ParseConfigFile(Config& config, const std::stri
         return std::unexpected(std::format("XML Parser: Empty document {}", path));
     }
 
-    if (!xmlSearchNsByHref(doc.get(), root, reinterpret_cast<const xmlChar*>(kIcesNamespace.data()))) {
-        return std::unexpected("XML Parser: Document of invalid type, no ices namespace found");
+    if (!xmlSearchNsByHref(doc.get(), root, reinterpret_cast<const xmlChar*>(kConfigNamespace.data()))) {
+        return std::unexpected("XML Parser: Document of invalid type, no gsradio namespace found");
     }
     if (NodeName(root) != "Configuration") {
         return std::unexpected(
@@ -429,8 +429,8 @@ std::expected<Config, ExitRequest> LoadConfig(int argc, char** argv) {
 
 void PrintUsage() {
     std::print(
-        "This is ices {} (gsradio {})\n"
-        "ices <options>\n"
+        "This is gsradio {}\n"
+        "gsradio <options>\n"
         "Options:\n"
         "\t-B (Background (daemon mode))\n"
         "\t-b <stream bitrate>\n"
@@ -458,7 +458,7 @@ void PrintUsage() {
         "\t-H <reencoded sample rate>\n"
         "\t-N <reencoded number of channels>\n"
         "\t-V (display version)\n",
-        build::kIcesVersion, build::kPackageVersion);
+        build::kPackageVersion);
 }
 
 void PrintVersion() {
@@ -466,9 +466,9 @@ void PrintVersion() {
     if constexpr (build::kHavePerl) features += " Perl";
     if constexpr (build::kHavePython) features += " python";
     std::print(
-        "ices {} (gsradio {})\nFeatures: {}\nSystem configuration file: "
-        "{}/ices.conf\n",
-        build::kIcesVersion, build::kPackageVersion, features, build::kEtcDir);
+        "gsradio {}\nFeatures: {}\nSystem configuration file: "
+        "{}/gsradio.conf\n",
+        build::kPackageVersion, features, build::kEtcDir);
     if constexpr (build::kHavePerl || build::kHavePython) {
         std::print("Playlist module directory: {}\n", build::kModuleDir);
     }
@@ -492,4 +492,4 @@ void LogConfig(const Config& config) {
     }
 }
 
-}  // namespace ices
+}  // namespace gsradio

@@ -1,15 +1,16 @@
 # gsradio — IceS 0.4 for the GStreamer era
 
-`ices` streams a playlist to an [Icecast](https://icecast.org/) (or
+`gsradio` streams a playlist to an [Icecast](https://icecast.org/) (or
 Shoutcast) server as MP3. It is a C++23 reimplementation of **IceS 0.4**
 ("ices0"), the last release of the original IceS line. It keeps ices0's
 on-the-fly **transcoding** of Ogg Vorbis, FLAC and MP3 into MP3, which the
 newer IceS 2.x dropped. Decoding, resampling and LAME encoding are done with
 GStreamer; the server connection uses libshout.
 
-It is a drop-in replacement. The binary is called `ices` and accepts the same
-command line options, XML configuration file, playlist scripts, signals,
-log/cue/pid files and exit behaviour.
+It has IceS 0.4's command line options, features and behaviour, under its own
+name: the program, configuration file, XML namespace, playlist script hooks
+and the files it writes are all called `gsradio`. See
+[Migrating from IceS 0.4](#migrating-from-ices-04) to convert existing setups.
 
 ## Building
 
@@ -36,9 +37,9 @@ Then:
 `./configure --help` lists the options. The useful ones:
 
 * `--prefix=DIR`, `--bindir=DIR`, `--mandir=DIR`: installation directories.
-* `--sysconfdir=DIR`: where `ices.conf` is looked up (default `PREFIX/etc`).
+* `--sysconfdir=DIR`: where `gsradio.conf` is looked up (default `PREFIX/etc`).
 * `--with-moduledir=DIR`: playlist module directory (default
-  `SYSCONFDIR/ices/modules`).
+  `SYSCONFDIR/gsradio/modules`).
 * `--with-examplesdir=DIR`: install the sample configuration files into DIR
   instead of the two directories above, for packaging.
 * `--disable-python` and `--disable-perl`: leave out scripted playlists
@@ -54,16 +55,16 @@ The compiler and flags come from `CC`, `CXX`, `CFLAGS`, `CXXFLAGS`,
 ## Quick start
 
     ls ~/music/*.{mp3,ogg,flac} > playlist.txt
-    ices -F playlist.txt -h icecast.example.com -P sourcepass -m /radio -R -b 128
+    gsradio -F playlist.txt -h icecast.example.com -P sourcepass -m /radio -R -b 128
 
 `-R` turns on re-encoding, which is needed for Ogg Vorbis and FLAC files. Or
-copy `conf/ices.conf.dist` to `ices.conf`, edit it, and run `ices -c ices.conf`.
-See `man ices` (`doc/ices.1`) for every option.
+copy `conf/gsradio.conf.dist` to `gsradio.conf`, edit it, and run `gsradio -c gsradio.conf`.
+See `man gsradio` (`doc/gsradio.1`) for every option.
 
 Several streams can be fed from one playlist, e.g. a pass-through 128 kbps
 stream plus a 32 kbps mono stream for narrowband listeners:
 
-    ices -F playlist.txt -P pass -m /hi -b 128 -m /lo -b 32 -R -N 1
+    gsradio -F playlist.txt -P pass -m /hi -b 128 -m /lo -b 32 -R -N 1
 
 (Each `-m` starts a new stream; options that follow it apply to that stream.)
 
@@ -90,8 +91,8 @@ the audio.
 | Feature | Status |
 |---|---|
 | All command line options (`-B -b -C -c -D -d -F -f -g -H -h -i -M -m -N -n -P -p -R -r -S -s -t -u -V -v`) | ✔ |
-| XML config (`ices:Configuration` namespace, `Playlist`/`Execution`/multiple `Stream` sections) | ✔ |
-| Config lookup: given path, then `$ICES_ETCDIR/<file>`; command line overrides config | ✔ |
+| XML config (`Configuration` root, `Playlist`/`Execution`/multiple `Stream` sections) | ✔ (gsradio namespace) |
+| Config lookup: given path, then `SYSCONFDIR/<file>`; command line overrides config | ✔ |
 | Multiple streams from one playlist, each with its own server/mount/encoding | ✔ |
 | Protocols `http` (Icecast 2), `xaudiocast` (Icecast 1), `icy` (Shoutcast) | ✔ |
 | Stream info: name, genre, description, URL, public flag, bitrate, server dumpfile | ✔ |
@@ -101,10 +102,10 @@ the audio.
 | Transcoding Ogg Vorbis and FLAC to MP3 | ✔ (plus anything GStreamer decodes) |
 | Crossfading (`-C`/`<Crossfade>`), linear, short-track rule | ✔ |
 | Builtin playlist: randomize, reload on change, wrap around | ✔ |
-| Python and Perl playlist modules (`ices_init/shutdown/get_next/get_metadata/get_lineno` and legacy names) | ✔ (Python 3) |
+| Python and Perl playlist modules (`init/shutdown/get_next/get_metadata/get_lineno` hooks) | ✔ (Python 3, `gsradio_` names) |
 | Title streaming from script, ID3/Vorbis comment tags, or the file name; delayed update after connect | ✔ |
 | Reading audio from stdin (`-` in the playlist) or a FIFO | ✔ |
-| `ices.log`, `ices.cue` (same 8-line format), `ices.pid` in the base directory | ✔ |
+| Log, cue (same 8-line format) and pid files in the base directory | ✔ (`gsradio.*`) |
 | SIGINT/SIGTERM shutdown, SIGHUP log reopen + playlist reload, SIGUSR1 skip | ✔ |
 | Daemon mode with the original messages | ✔ |
 | Exits after more than 10 consecutive bad tracks or more than 10 consecutive stream errors | ✔ |
@@ -114,10 +115,10 @@ the audio.
 These either fix bugs in ices0 or are unavoidable with modern libraries:
 
 * Python modules run on **Python 3** (ices0 used Python 2). The sample module
-  `conf/ices.py.dist` has been ported.
+  `conf/gsradio.py.dist` has been ported.
 * **Crossfading requires every stream to re-encode.** ices0 fed pass-through
   streams unfaded data, so they drifted further ahead with every track. If any
-  stream has `Reencode` 0, ices logs a warning and disables crossfading.
+  stream has `Reencode` 0, gsradio logs a warning and disables crossfading.
 * Builtin playlist: blank lines and `#` comments (for example M3U headers) are
   skipped. In ices0 a blank line could stop the stream. Randomized playlists
   are reshuffled on every pass (ices0 shuffled once), and SIGHUP also re-reads
@@ -135,12 +136,38 @@ These either fix bugs in ices0 or are unavoidable with modern libraries:
   rejected outright, so other formats with misleading extensions still play
   when re-encoding.
 
+## Migrating from IceS 0.4
+
+Everything IceS 0.4 could do works the same way, but the names have changed:
+
+| IceS 0.4 | gsradio |
+|---|---|
+| `ices` program, `ices(1)` | `gsradio`, `gsradio(1)` |
+| `ices.conf` | `gsradio.conf` |
+| `xmlns:ices="http://www.icecast.org/projects/ices"`, `<ices:Configuration>` | `xmlns:gsradio="https://github.com/danengholm/gsradio"`, `<gsradio:Configuration>` |
+| `ices.log`, `ices.cue`, `ices.pid` | `gsradio.log`, `gsradio.cue`, `gsradio.pid` |
+| default playlist module `ices` (`ices.py`, `ices.pm`) | `gsradio` (`gsradio.py`, `gsradio.pm`) |
+| module directory `…/etc/ices/modules` | `…/etc/gsradio/modules` |
+| `ices_init`, `ices_shutdown`, `ices_get_next`, `ices_get_metadata`, `ices_get_lineno` | `gsradio_init`, `gsradio_shutdown`, `gsradio_get_next`, `gsradio_get_metadata`, `gsradio_get_lineno` |
+| legacy `ices_python_*` / `ices_perl_*` hook names | not supported |
+| default mount `/ices` | `/gsradio` |
+
+The element names inside the configuration file are unchanged, so converting an
+`ices.conf` only needs the namespace and prefix replaced:
+
+    sed -e 's|http://www.icecast.org/projects/ices|https://github.com/danengholm/gsradio|' \
+        -e 's|ices:Configuration|gsradio:Configuration|g' -e 's|xmlns:ices=|xmlns:gsradio=|' \
+        ices.conf > gsradio.conf
+
+Playlist scripts need their functions renamed from `ices_*` to `gsradio_*`.
+Python modules also need porting to Python 3.
+
 ## Tests
 
     make check
-    # or: python3 tests/integration_test.py ./ices [test-name ...]
+    # or: python3 tests/integration_test.py ./gsradio [test-name ...]
 
-The integration suite generates test media, runs `ices` against a fake Icecast
+The integration suite generates test media, runs `gsradio` against a fake Icecast
 server (`tests/fake_icecast.py`, which speaks HTTP, x-audiocast and ICY),
 and checks titles, formats, durations, real-time pacing, crossfade shape,
 signals, daemon mode, stdin input and error handling. It needs
@@ -163,8 +190,8 @@ The settings live in `.clang-format`, `.style.yapf` and `CPPLINT.cfg`:
 clang-format's aligned array initializers as namespace indentation, and it reports
 `if (init; condition) statement;` as having multiple statements.
 
-The function names `ices_init`, `ices_get_next`, … in the playlist modules are IceS's
-public scripting API and are kept as they are. The Perl glue (`src/perl_glue.c`) is C
+The function names `gsradio_init`, `gsradio_get_next`, … in the playlist modules are the
+public scripting API and are kept in that form. The Perl glue (`src/perl_glue.c`) is C
 and uses C naming.
 
 ## License

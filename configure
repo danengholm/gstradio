@@ -5,7 +5,7 @@
 # configure - detect dependencies and write config.mk and src/build_config.h.
 # Run ./configure --help for options. Written for POSIX sh.
 
-VERSION=0.2
+VERSION=0.3
 
 prefix=/usr/local
 exec_prefix=
@@ -29,8 +29,8 @@ Installation directories:
   --exec-prefix=DIR         install programs under DIR [PREFIX]
   --bindir=DIR              user programs [EPREFIX/bin]
   --mandir=DIR              manual pages [PREFIX/share/man]
-  --sysconfdir=DIR          where ices.conf is looked up [PREFIX/etc]
-  --with-moduledir=DIR      playlist module directory [SYSCONFDIR/ices/modules]
+  --sysconfdir=DIR          where gsradio.conf is looked up [PREFIX/etc]
+  --with-moduledir=DIR      playlist module directory [SYSCONFDIR/gsradio/modules]
   --with-examplesdir=DIR    install the sample configuration files into DIR
                             instead of SYSCONFDIR and the module directory
 
@@ -89,7 +89,7 @@ done
 : "${bindir:=$exec_prefix/bin}"
 : "${mandir:=$prefix/share/man}"
 : "${sysconfdir:=$prefix/etc}"
-: "${moduledir:=$sysconfdir/ices/modules}"
+: "${moduledir:=$sysconfdir/gsradio/modules}"
 : "${CC:=cc}"
 : "${CXX:=c++}"
 : "${CFLAGS=-O2 -g}"
@@ -199,7 +199,7 @@ EOF
         [ "$with_lame" = yes ] && die "liblame requested but not found"
     fi
 fi
-defs="$defs -DICES_HAVE_LIBLAME=$have_lame"
+defs="$defs -DGSRADIO_HAVE_LIBLAME=$have_lame"
 
 # ---- embedded Python --------------------------------------------------------
 
@@ -231,7 +231,7 @@ EOF
         [ "$enable_python" = yes ] && die "Python embedding requested but not usable (see config.log)"
     fi
 fi
-defs="$defs -DICES_PYTHON_ENABLED=$have_python"
+defs="$defs -DGSRADIO_PYTHON_ENABLED=$have_python"
 
 # ---- embedded Perl ----------------------------------------------------------
 
@@ -275,7 +275,7 @@ EOF
         [ "$enable_perl" = yes ] && die "Perl embedding requested but not usable (see config.log)"
     fi
 fi
-defs="$defs -DICES_PERL_ENABLED=$have_perl"
+defs="$defs -DGSRADIO_PERL_ENABLED=$have_perl"
 
 # ---- output -----------------------------------------------------------------
 
@@ -310,7 +310,7 @@ CXXFLAGS = $(squeeze $cxx_std $CXXFLAGS)
 LDFLAGS = $(squeeze $LDFLAGS)
 DEFS = $(squeeze $defs)
 PKG_CFLAGS = $(squeeze $pkg_cflags)
-PERL_CFLAGS = $(squeeze $perl_cflags) -DICES_MODULEDIR='"$moduledir"'
+PERL_CFLAGS = $(squeeze $perl_cflags) -DGSRADIO_MODULEDIR='"$moduledir"'
 LIBS = $(squeeze $pkg_libs $libs $LIBS)
 OPTIONAL_OBJS = $(squeeze $optional_objs)
 EOF
@@ -331,7 +331,7 @@ cat <<EOF
 
 gsradio $VERSION configured:
   prefix:          $prefix
-  configuration:   $sysconfdir/ices.conf
+  configuration:   $sysconfdir/gsradio.conf
   module dir:      $moduledir
   liblame:         $(yesno $have_lame)
   Python modules:  $(yesno $have_python)

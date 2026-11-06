@@ -8,15 +8,15 @@
 #include "src/build_config.h"
 #include "src/log.h"
 
-namespace ices {
+namespace gsradio {
 
-#if !ICES_PYTHON_ENABLED
+#if !GSRADIO_PYTHON_ENABLED
 std::expected<std::unique_ptr<Playlist>, std::string> MakePythonPlaylist(const PlaylistConfig&) {
     return std::unexpected("This binary has no support for embedded python");
 }
 #endif
 
-#if !ICES_PERL_ENABLED
+#if !GSRADIO_PERL_ENABLED
 std::expected<std::unique_ptr<Playlist>, std::string> MakePerlPlaylist(const PlaylistConfig&) {
     return std::unexpected("This binary has no support for embedded perl");
 }
@@ -35,4 +35,4 @@ std::expected<std::unique_ptr<Playlist>, std::string> MakePlaylist(const Config&
     return std::unexpected("Unknown playlist module!");
 }
 
-}  // namespace ices
+}  // namespace gsradio

@@ -5,7 +5,7 @@
 
 #include <array>
 
-namespace ices::mp3 {
+namespace gsradio::mp3 {
 namespace {
 
 constexpr int kModeMono = 3;
@@ -116,4 +116,4 @@ std::optional<std::size_t> Id3v2Size(std::span<const std::uint8_t> b) {
     return size;
 }
 
-}  // namespace ices::mp3
+}  // namespace gsradio::mp3

@@ -21,7 +21,7 @@
 #include "src/log.h"
 #include "src/mp3.h"
 
-namespace ices {
+namespace gsradio {
 
 struct Mp3Info {
     mp3::Header header;
@@ -291,4 +291,4 @@ std::expected<std::size_t, std::string> InputSource::Read(std::span<std::uint8_t
     return static_cast<std::size_t>(r);
 }
 
-}  // namespace ices
+}  // namespace gsradio

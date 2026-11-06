@@ -4,7 +4,7 @@
 #include "src/encoder.h"
 
 #include <gst/audio/audio.h>
-#if ICES_HAVE_LIBLAME
+#if GSRADIO_HAVE_LIBLAME
 #include <lame/lame.h>
 #endif
 
@@ -18,7 +18,7 @@
 
 #include "src/log.h"
 
-namespace ices {
+namespace gsradio {
 namespace {
 
 constexpr std::array kMpeg1Bitrates{32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320};
@@ -57,7 +57,7 @@ int LameLowpass(int kbps) {
 }  // namespace
 
 int LameDefaultSamplerate(int in, int bitrate_kbps, int channels) {
-#if ICES_HAVE_LIBLAME
+#if GSRADIO_HAVE_LIBLAME
     // Ask LAME itself, exactly as IceS 0.4 did after lame_init_params().
     if (lame_global_flags* lame = lame_init()) {
         lame_set_in_samplerate(lame, in);
@@ -218,4 +218,4 @@ std::expected<void, std::string> Encoder::PollBus() {
     return {};
 }
 
-}  // namespace ices
+}  // namespace gsradio

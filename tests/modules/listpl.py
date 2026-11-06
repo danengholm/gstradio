@@ -1,12 +1,12 @@
 # Playlist module for the integration tests: plays the files listed in
-# $ICES_TEST_LIST (separated by ':') once, then returns '' so ices exits.
+# $GSRADIO_TEST_LIST (separated by ':') once, then returns '' so gsradio exits.
 import os
 
-files = [f for f in os.environ.get("ICES_TEST_LIST", "").split(":") if f]
+files = [f for f in os.environ.get("GSRADIO_TEST_LIST", "").split(":") if f]
 pos = 0
 
 
-def ices_get_next():
+def gsradio_get_next():
     global pos
     if pos >= len(files):
         return ""
@@ -14,5 +14,5 @@ def ices_get_next():
     return files[pos - 1]
 
 
-def ices_get_lineno():
+def gsradio_get_lineno():
     return pos

@@ -7,7 +7,7 @@
 
 #include "src/log.h"
 
-namespace ices {
+namespace gsradio {
 
 void Crossfader::SetRate(int rate) {
     fade_frames_ = static_cast<std::size_t>(seconds_) * static_cast<std::size_t>(rate);
@@ -82,4 +82,4 @@ void Crossfader::Process(std::vector<float>& io) {
     io.resize(i * 2);
 }
 
-}  // namespace ices
+}  // namespace gsradio

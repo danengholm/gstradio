@@ -12,7 +12,7 @@
 
 #include "src/config.h"
 
-namespace ices {
+namespace gsradio {
 
 class Playlist {
  public:
@@ -38,6 +38,6 @@ std::expected<std::unique_ptr<Playlist>, std::string> MakeBuiltinPlaylist(const 
 std::expected<std::unique_ptr<Playlist>, std::string> MakePythonPlaylist(const PlaylistConfig& config);
 std::expected<std::unique_ptr<Playlist>, std::string> MakePerlPlaylist(const PlaylistConfig& config);
 
-}  // namespace ices
+}  // namespace gsradio
 
 #endif  // GSRADIO_SRC_PLAYLIST_H_

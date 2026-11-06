@@ -1,8 +1,8 @@
-.TH ICES 1 "November 2026" "gsradio 0.2 (ices 0.4)" "Icecast media streaming system"
+.TH GSRADIO 1 "November 2026" "gsradio 0.3" "Icecast media streaming system"
 .SH NAME
-ices \- stream MP3 audio to an icecast server
+gsradio \- stream MP3 audio to an icecast server
 .SH SYNOPSIS
-.B ices
+.B gsradio
 [\fB\-BVv\fR]
 [\fB\-c\fR \fIconfigfile\fR]
 [\fB\-D\fR \fIbasedir\fR]
@@ -13,9 +13,9 @@ ices \- stream MP3 audio to an icecast server
 [\fB\-u\fR \fIurl\fR] [\fB\-s\fR] [\fB\-b\fR \fIbitrate\fR] [\fB\-f\fR \fIdumpfile\fR]
 [\fB\-R\fR [\fB\-H\fR \fIsamplerate\fR] [\fB\-N\fR \fIchannels\fR]]] ...
 .SH DESCRIPTION
-.B ices
-is a source client for icecast servers, compatible with IceS 0.4 and built
-on GStreamer. Its features include:
+.B gsradio
+is a source client for icecast servers built on GStreamer. It is derived
+from IceS 0.4, whose command line options it shares. Its features include:
 .IP \(bu 2
 A scripting interface to its playlist engine, using python or perl, in
 addition to a builtin static playlist.
@@ -37,11 +37,11 @@ A constantly updated cue file describing the current track.
 .TP
 .B \-B
 Detach from the console and run in the background. The process id is
-written to \fIbasedir\fR/ices.pid.
+written to \fIbasedir\fR/gsradio.pid.
 .TP
 .BI \-c " configfile"
 Load configuration from \fIconfigfile\fR instead of the default
-(\fBices.conf\fR in the current directory or the system configuration
+(\fBgsradio.conf\fR in the current directory or the system configuration
 directory). Command line options override the file.
 .TP
 .BI \-D " basedir"
@@ -67,7 +67,7 @@ audio from standard input.
 Play the builtin playlist in random order.
 .TP
 .BI \-M " module"
-Python or perl module to load instead of the default, \fBices\fR.
+Python or perl module to load instead of the default, \fBgsradio\fR.
 .TP
 .BI \-C " crossfadesecs"
 Crossfade between tracks for \fIcrossfadesecs\fR seconds. Tracks shorter
@@ -77,7 +77,7 @@ than 10 seconds or twice the fade length are not faded into.
 .BI \-m " mount"
 Create a stream at mountpoint \fImount\fR. May be given several times to
 create multiple streams from the same playlist; the stream options that
-follow apply to that mount only. The default mount is /ices.
+follow apply to that mount only. The default mount is /gsradio.
 .TP
 .BI \-h " host"
 Icecast server host (default 127.0.0.1).
@@ -131,7 +131,7 @@ bitrate is used.
 Output channels when reencoding: 1 (mono) or 2 (stereo).
 .SH CONFIGURATION FILE
 An XML document whose root is \fBConfiguration\fR in the namespace
-\fBhttp://www.icecast.org/projects/ices\fR, containing:
+\fBhttps://github.com/danengholm/gsradio\fR, containing:
 .TP
 .B Playlist
 \fBFile\fR, \fBRandomize\fR, \fBType\fR, \fBModule\fR, \fBCrossfade\fR.
@@ -145,32 +145,29 @@ An XML document whose root is \fBConfiguration\fR in the namespace
 \fBGenre\fR, \fBDescription\fR, \fBURL\fR, \fBPublic\fR, \fBBitrate\fR,
 \fBReencode\fR, \fBSamplerate\fR, \fBChannels\fR.
 .PP
-See ices.conf.dist for an annotated example.
+See gsradio.conf.dist for an annotated example.
 .SH PLAYLIST SCRIPTING
 A python (3) or perl module may define these functions:
 .TP
-.B ices_init
-Called once at startup. A negative result makes ices exit.
+.B gsradio_init
+Called once at startup. A negative result makes gsradio exit.
 .TP
-.B ices_shutdown
-Called before ices exits.
+.B gsradio_shutdown
+Called before gsradio exits.
 .TP
-.B ices_get_next
+.B gsradio_get_next
 Called at each track change; returns the path of the next file to play. An
 empty result ends streaming. This function is required.
 .TP
-.B ices_get_metadata
-Called after \fBices_get_next\fR. If it returns a string, it is used as the
+.B gsradio_get_metadata
+Called after \fBgsradio_get_next\fR. If it returns a string, it is used as the
 streamed title instead of one built from the file's tags or name.
 .TP
-.B ices_get_lineno
-Called after \fBices_get_next\fR; the returned number is written to the cue
+.B gsradio_get_lineno
+Called after \fBgsradio_get_next\fR; the returned number is written to the cue
 file.
 .PP
-The older names ices_python_initialize, ices_python_shutdown,
-ices_python_get_next, ices_python_get_metadata and
-ices_python_get_current_lineno (and their ices_perl_ equivalents) are also
-recognized. Modules are searched for in the playlist module directory and
+Modules are searched for in the playlist module directory and
 the current directory (plus PYTHONPATH for python). Perl modules must end
 with "1;".
 .SH SIGNALS
@@ -186,20 +183,20 @@ playlist script).
 Skip to the next track immediately.
 .SH FILES
 .TP
-.I basedir/ices.log
+.I basedir/gsradio.log
 Log file.
 .TP
-.I basedir/ices.cue
+.I basedir/gsradio.cue
 Current track: file name, size, bitrate, length (d:h:m:s), percent played,
 playlist line, artist and title, one per line.
 .TP
-.I basedir/ices.pid
+.I basedir/gsradio.pid
 Process id when running in the background.
 .TP
-.I sysconfdir/ices.conf
+.I sysconfdir/gsradio.conf
 Default configuration file.
 .TP
-.I moduledir/ices.py, moduledir/ices.pm
+.I moduledir/gsradio.py, moduledir/gsradio.pm
 Default playlist modules.
 .SH EXIT STATUS
 0 on a normal shutdown (signal or end of playlist), 1 on error, including
@@ -207,4 +204,4 @@ more than 10 consecutive unplayable tracks or more than 10 consecutive
 errors on a stream.
 .SH AUTHORS
 IceS was originally written by Alexander Hav\(:ang and maintained by
-Brendan Cully. This GStreamer-based reimplementation is part of gsradio.
+Brendan Cully. gsradio is a GStreamer-based reimplementation of IceS 0.4.

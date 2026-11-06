@@ -24,7 +24,7 @@
 
 #include "src/gst_util.h"
 
-namespace ices {
+namespace gsradio {
 
 // The output sample rate LAME picks by default for a given input rate and
 // bitrate (queried from liblame when available).
@@ -67,6 +67,6 @@ class Encoder {
     std::uint64_t frames_pushed_ = 0;
 };
 
-}  // namespace ices
+}  // namespace gsradio
 
 #endif  // GSRADIO_SRC_ENCODER_H_

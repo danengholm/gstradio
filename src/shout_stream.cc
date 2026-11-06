@@ -12,11 +12,10 @@
 #include "src/build_config.h"
 #include "src/log.h"
 
-namespace ices {
+namespace gsradio {
 
 std::string ShoutStream::UserAgent() {
-    return std::format("ices/{} (gsradio/{}) libshout/{}", build::kIcesVersion, build::kPackageVersion,
-                       shout_version(nullptr, nullptr, nullptr));
+    return std::format("gsradio/{} libshout/{}", build::kPackageVersion, shout_version(nullptr, nullptr, nullptr));
 }
 
 void ConfigureShout(shout_t* s, const StreamConfig& c) {
@@ -111,4 +110,4 @@ ShoutStream::SendResult ShoutStream::Send(std::span<const std::uint8_t> data) {
     return SendResult::kFailed;
 }
 
-}  // namespace ices
+}  // namespace gsradio

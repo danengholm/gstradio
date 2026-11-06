@@ -12,7 +12,7 @@
 #include <span>
 #include <string_view>
 
-namespace ices::mp3 {
+namespace gsradio::mp3 {
 
 struct Header {
     int version = 0;  // 0 = MPEG-1, 1 = MPEG-2 LSF, 2 = MPEG-2.5
@@ -50,6 +50,6 @@ bool SameStream(const Header& a, const Header& b);
 // ID3v2 tag size (including header and footer) if `bytes` begins with one.
 [[nodiscard]] std::optional<std::size_t> Id3v2Size(std::span<const std::uint8_t> bytes);
 
-}  // namespace ices::mp3
+}  // namespace gsradio::mp3
 
 #endif  // GSRADIO_SRC_MP3_H_

@@ -13,7 +13,7 @@
 #include "src/log.h"
 #include "src/shout_stream.h"
 
-namespace ices {
+namespace gsradio {
 
 std::string CleanFilename(std::string_view path) {
     if (auto slash = path.rfind('/'); slash != std::string_view::npos) {
@@ -103,4 +103,4 @@ void MetadataUpdater::Run(std::stop_token stop) {
     }
 }
 
-}  // namespace ices
+}  // namespace gsradio

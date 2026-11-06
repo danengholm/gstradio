@@ -20,7 +20,7 @@
 
 #include "src/config.h"
 
-namespace ices {
+namespace gsradio {
 
 class ShoutStream {
  public:
@@ -72,6 +72,6 @@ class ShoutStream {
 // Applies the server settings of `config` to a shout_t.
 void ConfigureShout(shout_t* shout, const StreamConfig& config);
 
-}  // namespace ices
+}  // namespace gsradio
 
 #endif  // GSRADIO_SRC_SHOUT_STREAM_H_

@@ -47,10 +47,10 @@ HDRS = \
 	src/source.h \
 	src/streamer.h
 
-all: ices
+all: gsradio
 
-ices: $(OBJS)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o ices $(OBJS) $(LIBS)
+gsradio: $(OBJS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o gsradio $(OBJS) $(LIBS)
 
 $(OBJS): $(HDRS) config.mk
 
@@ -61,26 +61,26 @@ $(OBJS): $(HDRS) config.mk
 .c.o:
 	$(CC) $(CPPFLAGS) -I. $(PERL_CFLAGS) $(CFLAGS) -c -o $@ $<
 
-install: ices
+install: gsradio
 	mkdir -p $(DESTDIR)$(BINDIR) $(DESTDIR)$(MANDIR)/man1
 	mkdir -p $(DESTDIR)$(CONF_DIST_DIR) $(DESTDIR)$(MODULE_DIST_DIR)
-	$(INSTALL) -m 755 ices $(DESTDIR)$(BINDIR)/ices
-	$(INSTALL) -m 644 doc/ices.1 $(DESTDIR)$(MANDIR)/man1/ices.1
-	$(INSTALL) -m 644 conf/ices.conf.dist $(DESTDIR)$(CONF_DIST_DIR)/ices.conf.dist
-	$(INSTALL) -m 644 conf/ices.py.dist $(DESTDIR)$(MODULE_DIST_DIR)/ices.py.dist
-	$(INSTALL) -m 644 conf/ices.pm.dist $(DESTDIR)$(MODULE_DIST_DIR)/ices.pm.dist
+	$(INSTALL) -m 755 gsradio $(DESTDIR)$(BINDIR)/gsradio
+	$(INSTALL) -m 644 doc/gsradio.1 $(DESTDIR)$(MANDIR)/man1/gsradio.1
+	$(INSTALL) -m 644 conf/gsradio.conf.dist $(DESTDIR)$(CONF_DIST_DIR)/gsradio.conf.dist
+	$(INSTALL) -m 644 conf/gsradio.py.dist $(DESTDIR)$(MODULE_DIST_DIR)/gsradio.py.dist
+	$(INSTALL) -m 644 conf/gsradio.pm.dist $(DESTDIR)$(MODULE_DIST_DIR)/gsradio.pm.dist
 
 uninstall:
-	rm -f $(DESTDIR)$(BINDIR)/ices $(DESTDIR)$(MANDIR)/man1/ices.1
-	rm -f $(DESTDIR)$(CONF_DIST_DIR)/ices.conf.dist
-	rm -f $(DESTDIR)$(MODULE_DIST_DIR)/ices.py.dist $(DESTDIR)$(MODULE_DIST_DIR)/ices.pm.dist
+	rm -f $(DESTDIR)$(BINDIR)/gsradio $(DESTDIR)$(MANDIR)/man1/gsradio.1
+	rm -f $(DESTDIR)$(CONF_DIST_DIR)/gsradio.conf.dist
+	rm -f $(DESTDIR)$(MODULE_DIST_DIR)/gsradio.py.dist $(DESTDIR)$(MODULE_DIST_DIR)/gsradio.pm.dist
 
 # Integration tests (need gst-launch-1.0, ffmpeg and ffprobe).
-check: ices
-	tests/run_tests.sh ./ices
+check: gsradio
+	tests/run_tests.sh ./gsradio
 
 clean:
-	rm -f ices src/*.o
+	rm -f gsradio src/*.o
 
 distclean: clean
 	rm -f config.mk config.log src/build_config.h

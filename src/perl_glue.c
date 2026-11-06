@@ -19,9 +19,9 @@ EXTERN_C void boot_DynaLoader(pTHX_ CV* cv);
 /* Needed so that modules used by the script can load XS extensions. */
 static void xs_init(pTHX) { newXS("DynaLoader::boot_DynaLoader", boot_DynaLoader, __FILE__); }
 
-int ices_perl_start(const char* module, char* errbuf, size_t errlen) {
+int gsradio_perl_start(const char* module, char* errbuf, size_t errlen) {
     static char arg0[] = "";
-    static char inc_moddir[] = "-I" ICES_MODULEDIR;
+    static char inc_moddir[] = "-I" GSRADIO_MODULEDIR;
     static char inc_cwd[] = "-I.";
     static char arg_e[] = "-e";
     static char code[512];
@@ -50,18 +50,18 @@ int ices_perl_start(const char* module, char* errbuf, size_t errlen) {
 
     if (perl_parse(my_perl, xs_init, argc, argv, NULL) != 0) {
         snprintf(errbuf, errlen, "perl_parse() error: could not load module %s", module);
-        ices_perl_stop();
+        gsradio_perl_stop();
         return -1;
     }
     if (perl_run(my_perl) != 0) {
         snprintf(errbuf, errlen, "perl_run() error in module %s", module);
-        ices_perl_stop();
+        gsradio_perl_stop();
         return -1;
     }
     return 0;
 }
 
-void ices_perl_stop(void) {
+void gsradio_perl_stop(void) {
     if (my_perl) {
         PERL_SET_CONTEXT(my_perl);
         perl_destruct(my_perl);
@@ -70,13 +70,13 @@ void ices_perl_stop(void) {
     }
 }
 
-int ices_perl_has_sub(const char* name) {
+int gsradio_perl_has_sub(const char* name) {
     if (!my_perl) return 0;
     PERL_SET_CONTEXT(my_perl);
     return get_cv(name, 0) != NULL;
 }
 
-char* ices_perl_call(const char* name, int* died, char* errbuf, size_t errlen) {
+char* gsradio_perl_call(const char* name, int* died, char* errbuf, size_t errlen) {
     char* result = NULL;
     int count;
     *died = 0;
@@ -107,8 +107,8 @@ char* ices_perl_call(const char* name, int* died, char* errbuf, size_t errlen) {
     return result;
 }
 
-void ices_perl_term(void) {
-    ices_perl_stop();
+void gsradio_perl_term(void) {
+    gsradio_perl_stop();
     if (sys_initialized) {
         PERL_SYS_TERM();
         sys_initialized = 0;

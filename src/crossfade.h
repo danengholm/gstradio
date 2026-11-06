@@ -14,7 +14,7 @@
 #include <optional>
 #include <vector>
 
-namespace ices {
+namespace gsradio {
 
 class Crossfader {
  public:
@@ -42,6 +42,6 @@ class Crossfader {
     bool skip_next_ = false;
 };
 
-}  // namespace ices
+}  // namespace gsradio
 
 #endif  // GSRADIO_SRC_CROSSFADE_H_

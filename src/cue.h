@@ -1,7 +1,7 @@
 // Copyright 2026 The gsradio Authors
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-// The cue file (<basedir>/ices.cue), rewritten continuously while playing.
+// The cue file (<basedir>/gsradio.cue), rewritten continuously while playing.
 // Format (one item per line, as in IceS 0.4):
 //   filename
 //   size
@@ -19,11 +19,11 @@
 
 #include "src/source.h"
 
-namespace ices {
+namespace gsradio {
 
 class CueFile {
  public:
-    explicit CueFile(std::filesystem::path base_directory) : path_(std::move(base_directory) / "ices.cue") {}
+    explicit CueFile(std::filesystem::path base_directory) : path_(std::move(base_directory) / "gsradio.cue") {}
     CueFile(const CueFile&) = default;
     CueFile& operator=(const CueFile&) = default;
 
@@ -37,6 +37,6 @@ class CueFile {
     bool warned_ = false;
 };
 
-}  // namespace ices
+}  // namespace gsradio
 
 #endif  // GSRADIO_SRC_CUE_H_

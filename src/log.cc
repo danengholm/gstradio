@@ -13,7 +13,7 @@
 #include <print>
 #include <string>
 
-namespace ices::log {
+namespace gsradio::log {
 namespace {
 
 struct State {
@@ -57,7 +57,7 @@ std::expected<void, std::string> Open(const std::filesystem::path& base_director
     auto& s = GetState();
     std::scoped_lock lock(s.mutex);
     CloseLocked(s);
-    s.path = base_directory / "ices.log";
+    s.path = base_directory / "gsradio.log";
     return OpenLocked(s);
 }
 
@@ -99,4 +99,4 @@ void Write(std::string_view message, bool is_debug) {
     }
 }
 
-}  // namespace ices::log
+}  // namespace gsradio::log

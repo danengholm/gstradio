@@ -224,6 +224,9 @@ EOF
         have_python=1
         pkg_cflags="$pkg_cflags $($PKG_CONFIG --cflags "$python_pc")"
         libs="$libs $($PKG_CONFIG --libs "$python_pc")"
+        case $(uname -s) in
+            NetBSD) libs="$libs -lutil" ;;
+        esac
         optional_objs="$optional_objs src/playlist_python.o"
         result yes
     else

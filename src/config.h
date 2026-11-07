@@ -1,4 +1,4 @@
-// Copyright 2026 The gsradio Authors
+// Copyright 2026 The gstradio Authors
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 // Configuration model and parsing (IceS 0.4 setup.c / ices_config.c).
@@ -6,8 +6,8 @@
 // Precedence: hard-coded defaults, then the XML configuration file, then the
 // command line. Each <Stream> element (or each -m option after the first)
 // creates an additional stream fed from the same playlist.
-#ifndef GSRADIO_SRC_CONFIG_H_
-#define GSRADIO_SRC_CONFIG_H_
+#ifndef GSTRADIO_SRC_CONFIG_H_
+#define GSTRADIO_SRC_CONFIG_H_
 
 #include <expected>
 #include <optional>
@@ -15,7 +15,7 @@
 #include <string_view>
 #include <vector>
 
-namespace gsradio {
+namespace gstradio {
 
 enum class Protocol { kHttp, kXaudiocast, kIcy };
 enum class PlaylistType { kBuiltin, kPython, kPerl };
@@ -30,7 +30,7 @@ struct StreamConfig {
     std::string password = "letmein";
     Protocol protocol = Protocol::kHttp;
     // Stream
-    std::string mount = "/gsradio";
+    std::string mount = "/gstradio";
     std::optional<std::string> dumpfile;
     std::string name = "Default stream name";
     std::string genre = "Default genre";
@@ -48,14 +48,14 @@ struct PlaylistConfig {
     PlaylistType type = PlaylistType::kBuiltin;
     bool randomize = false;
     std::string file = "playlist.txt";
-    std::string module = "gsradio";
+    std::string module = "gstradio";
     int crossfade = 0;  // seconds, 0 = disabled
 };
 
 inline constexpr std::string_view kDefaultTimestampFormat = "%c";
 
 struct Config {
-    std::string configfile = "gsradio.conf";
+    std::string configfile = "gstradio.conf";
     bool daemon = false;
     int verbose = 0;
     std::string base_directory = "/tmp";
@@ -84,6 +84,6 @@ void PrintVersion();
 // Log the effective configuration in verbose mode.
 void LogConfig(const Config& config);
 
-}  // namespace gsradio
+}  // namespace gstradio
 
-#endif  // GSRADIO_SRC_CONFIG_H_
+#endif  // GSTRADIO_SRC_CONFIG_H_

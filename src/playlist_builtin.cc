@@ -1,4 +1,4 @@
-// Copyright 2026 The gsradio Authors
+// Copyright 2026 The gstradio Authors
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 // Builtin playlist: a text file with one path per line.
@@ -20,7 +20,7 @@
 #include "src/log.h"
 #include "src/playlist.h"
 
-namespace gsradio {
+namespace gstradio {
 namespace {
 
 class BuiltinPlaylist final : public Playlist {
@@ -126,4 +126,4 @@ std::expected<std::unique_ptr<Playlist>, std::string> MakeBuiltinPlaylist(const 
     return pl;
 }
 
-}  // namespace gsradio
+}  // namespace gstradio

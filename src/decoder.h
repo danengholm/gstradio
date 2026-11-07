@@ -1,4 +1,4 @@
-// Copyright 2026 The gsradio Authors
+// Copyright 2026 The gstradio Authors
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 // GStreamer decoding pipeline for one track:
@@ -10,8 +10,8 @@
 // Compressed bytes are pushed in by the streaming loop; interleaved stereo
 // float PCM is pulled out. Handles anything GStreamer can decode (Ogg Vorbis,
 // FLAC, MP3, ...).
-#ifndef GSRADIO_SRC_DECODER_H_
-#define GSRADIO_SRC_DECODER_H_
+#ifndef GSTRADIO_SRC_DECODER_H_
+#define GSTRADIO_SRC_DECODER_H_
 
 #include <gst/app/gstappsink.h>
 #include <gst/app/gstappsrc.h>
@@ -28,7 +28,7 @@
 #include "src/gst_util.h"
 #include "src/source.h"
 
-namespace gsradio {
+namespace gstradio {
 
 class Decoder {
  public:
@@ -68,6 +68,6 @@ class Decoder {
     int bitrate_kbps_ = 0;
 };
 
-}  // namespace gsradio
+}  // namespace gstradio
 
-#endif  // GSRADIO_SRC_DECODER_H_
+#endif  // GSTRADIO_SRC_DECODER_H_

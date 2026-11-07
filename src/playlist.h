@@ -1,9 +1,9 @@
-// Copyright 2026 The gsradio Authors
+// Copyright 2026 The gstradio Authors
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 // Playlist module interface (IceS 0.4 playlist/playlist.c).
-#ifndef GSRADIO_SRC_PLAYLIST_H_
-#define GSRADIO_SRC_PLAYLIST_H_
+#ifndef GSTRADIO_SRC_PLAYLIST_H_
+#define GSTRADIO_SRC_PLAYLIST_H_
 
 #include <expected>
 #include <memory>
@@ -12,7 +12,7 @@
 
 #include "src/config.h"
 
-namespace gsradio {
+namespace gstradio {
 
 class Playlist {
  public:
@@ -38,6 +38,6 @@ std::expected<std::unique_ptr<Playlist>, std::string> MakeBuiltinPlaylist(const 
 std::expected<std::unique_ptr<Playlist>, std::string> MakePythonPlaylist(const PlaylistConfig& config);
 std::expected<std::unique_ptr<Playlist>, std::string> MakePerlPlaylist(const PlaylistConfig& config);
 
-}  // namespace gsradio
+}  // namespace gstradio
 
-#endif  // GSRADIO_SRC_PLAYLIST_H_
+#endif  // GSTRADIO_SRC_PLAYLIST_H_

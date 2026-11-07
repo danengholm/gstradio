@@ -1,12 +1,12 @@
-// Copyright 2026 The gsradio Authors
+// Copyright 2026 The gstradio Authors
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 // Embedded Perl playlist module (IceS 0.4 pm_perl.c).
 //
 // "use <module>" is evaluated with the playlist module directory and the
 // current directory in @INC; the module must end with "1;". Subs are looked up
-// in package main: gsradio_get_next (required), gsradio_init, gsradio_shutdown,
-// gsradio_get_metadata and gsradio_get_lineno.
+// in package main: gstradio_get_next (required), gstradio_init, gstradio_shutdown,
+// gstradio_get_metadata and gstradio_get_lineno.
 #include <array>
 #include <cstdlib>
 #include <memory>
@@ -17,23 +17,23 @@
 #include "src/perl_glue.h"
 #include "src/playlist.h"
 
-namespace gsradio {
+namespace gstradio {
 namespace {
 
 class PerlPlaylist final : public Playlist {
  public:
     explicit PerlPlaylist(PlaylistConfig config) : config_(std::move(config)) {}
-    ~PerlPlaylist() override { gsradio_perl_term(); }
+    ~PerlPlaylist() override { gstradio_perl_term(); }
 
     std::expected<void, std::string> Start() {
         log::Debug("Importing perl module: {}", config_.module);
         std::array<char, 1024> err{};
-        if (gsradio_perl_start(config_.module.c_str(), err.data(), err.size()) != 0) {
+        if (gstradio_perl_start(config_.module.c_str(), err.data(), err.size()) != 0) {
             return std::unexpected(std::string(err.data()));
         }
         FindHooks();
         if (!get_next_) {
-            return std::unexpected("The playlist module must define at least the gsradio_get_next method");
+            return std::unexpected("The playlist module must define at least the gstradio_get_next method");
         }
         return {};
     }
@@ -43,8 +43,8 @@ class PerlPlaylist final : public Playlist {
         if (!init_) return {};
         auto ret = Call(init_);
         const int rc = ret ? std::atoi(ret->c_str()) : -1;
-        if (rc <= 0) log::Info("Execution of 'gsradio_init' failed");
-        if (rc < 0) return std::unexpected("gsradio_init failed");
+        if (rc <= 0) log::Info("Execution of 'gstradio_init' failed");
+        if (rc < 0) return std::unexpected("gstradio_init failed");
         return {};
     }
 
@@ -70,23 +70,23 @@ class PerlPlaylist final : public Playlist {
 
     void Shutdown() override {
         if (shutdown_) Call(shutdown_);
-        gsradio_perl_stop();
+        gstradio_perl_stop();
         init_ = shutdown_ = get_next_ = get_metadata_ = get_lineno_ = nullptr;
     }
 
  private:
     static const char* Find(const char* name) {
-        if (!gsradio_perl_has_sub(name)) return nullptr;
+        if (!gstradio_perl_has_sub(name)) return nullptr;
         log::Debug("Found method: {}", name);
         return name;
     }
 
     void FindHooks() {
-        init_ = Find("gsradio_init");
-        shutdown_ = Find("gsradio_shutdown");
-        get_next_ = Find("gsradio_get_next");
-        get_metadata_ = Find("gsradio_get_metadata");
-        get_lineno_ = Find("gsradio_get_lineno");
+        init_ = Find("gstradio_init");
+        shutdown_ = Find("gstradio_shutdown");
+        get_next_ = Find("gstradio_get_next");
+        get_metadata_ = Find("gstradio_get_metadata");
+        get_lineno_ = Find("gstradio_get_lineno");
     }
 
     static std::optional<std::string> Call(const char* function) {
@@ -94,7 +94,7 @@ class PerlPlaylist final : public Playlist {
         log::Debug("Interpreting [{}]", function);
         std::array<char, 1024> err{};
         int died = 0;
-        std::unique_ptr<char, decltype(&std::free)> ret{gsradio_perl_call(function, &died, err.data(), err.size()),
+        std::unique_ptr<char, decltype(&std::free)> ret{gstradio_perl_call(function, &died, err.data(), err.size()),
                                                         &std::free};
         if (died) log::Debug("perl error: {}", err.data());
         log::Debug("Done interpreting [{}]", function);
@@ -118,4 +118,4 @@ std::expected<std::unique_ptr<Playlist>, std::string> MakePerlPlaylist(const Pla
     return pl;
 }
 
-}  // namespace gsradio
+}  // namespace gstradio

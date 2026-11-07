@@ -1,7 +1,7 @@
-// Copyright 2026 The gsradio Authors
+// Copyright 2026 The gstradio Authors
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-// gsradio - stream MP3 audio to an Icecast server.
+// gstradio - stream MP3 audio to an Icecast server.
 // A C++23/GStreamer reimplementation of IceS 0.4 (ices0), including its
 // on-the-fly transcoding of Ogg Vorbis, FLAC and MP3 to MP3.
 #include <fcntl.h>
@@ -20,11 +20,11 @@
 #include "src/signals.h"
 #include "src/streamer.h"
 
-namespace gsradio {
+namespace gstradio {
 namespace {
 
 std::filesystem::path PidfilePath(const Config& config) {
-    return std::filesystem::path(config.base_directory) / "gsradio.pid";
+    return std::filesystem::path(config.base_directory) / "gstradio.pid";
 }
 
 // Detaches from the terminal. The parent reports the child's pid and exits.
@@ -104,7 +104,7 @@ int Main(int argc, char** argv) {
 
     const int status = Stream(*config);
 
-    log::Info("gsradio exiting...");
+    log::Info("gstradio exiting...");
     log::Close();
     if (config->daemon) {
         std::error_code ec;
@@ -116,6 +116,6 @@ int Main(int argc, char** argv) {
 }
 
 }  // namespace
-}  // namespace gsradio
+}  // namespace gstradio
 
-int main(int argc, char** argv) { return gsradio::Main(argc, argv); }
+int main(int argc, char** argv) { return gstradio::Main(argc, argv); }

@@ -1,4 +1,4 @@
-// Copyright 2026 The gsradio Authors
+// Copyright 2026 The gstradio Authors
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 // Crossfader (port of IceS 0.4 crossfade.c).
@@ -7,14 +7,14 @@
 // track starts, the held tail is mixed linearly into the beginning of the new
 // track. Tracks shorter than max(10 s, 2 * N) are not faded into, and neither
 // is the track following them.
-#ifndef GSRADIO_SRC_CROSSFADE_H_
-#define GSRADIO_SRC_CROSSFADE_H_
+#ifndef GSTRADIO_SRC_CROSSFADE_H_
+#define GSTRADIO_SRC_CROSSFADE_H_
 
 #include <cstddef>
 #include <optional>
 #include <vector>
 
-namespace gsradio {
+namespace gstradio {
 
 class Crossfader {
  public:
@@ -42,6 +42,6 @@ class Crossfader {
     bool skip_next_ = false;
 };
 
-}  // namespace gsradio
+}  // namespace gstradio
 
-#endif  // GSRADIO_SRC_CROSSFADE_H_
+#endif  // GSTRADIO_SRC_CROSSFADE_H_

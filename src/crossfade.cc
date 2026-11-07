@@ -1,4 +1,4 @@
-// Copyright 2026 The gsradio Authors
+// Copyright 2026 The gstradio Authors
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "src/crossfade.h"
@@ -7,7 +7,7 @@
 
 #include "src/log.h"
 
-namespace gsradio {
+namespace gstradio {
 
 void Crossfader::SetRate(int rate) {
     fade_frames_ = static_cast<std::size_t>(seconds_) * static_cast<std::size_t>(rate);
@@ -82,4 +82,4 @@ void Crossfader::Process(std::vector<float>& io) {
     io.resize(i * 2);
 }
 
-}  // namespace gsradio
+}  // namespace gstradio

@@ -1,4 +1,4 @@
-// Copyright 2026 The gsradio Authors
+// Copyright 2026 The gstradio Authors
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "src/cue.h"
@@ -11,7 +11,7 @@
 
 #include "src/log.h"
 
-namespace gsradio {
+namespace gstradio {
 namespace {
 
 std::string FileTime(int bitrate, std::uint64_t filesize) {
@@ -51,4 +51,4 @@ void CueFile::Remove() {
     std::filesystem::remove(path_, ec);
 }
 
-}  // namespace gsradio
+}  // namespace gstradio

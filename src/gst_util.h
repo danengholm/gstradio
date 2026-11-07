@@ -1,16 +1,16 @@
-// Copyright 2026 The gsradio Authors
+// Copyright 2026 The gstradio Authors
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 // Small RAII helpers for GStreamer / GLib objects.
-#ifndef GSRADIO_SRC_GST_UTIL_H_
-#define GSRADIO_SRC_GST_UTIL_H_
+#ifndef GSTRADIO_SRC_GST_UTIL_H_
+#define GSTRADIO_SRC_GST_UTIL_H_
 
 #include <gst/gst.h>
 
 #include <memory>
 #include <string>
 
-namespace gsradio::gst {
+namespace gstradio::gst {
 
 struct ObjectUnref {
     void operator()(gpointer p) const {
@@ -86,6 +86,6 @@ inline std::string MessageText(GstMessage* msg) {
     return text;
 }
 
-}  // namespace gsradio::gst
+}  // namespace gstradio::gst
 
-#endif  // GSRADIO_SRC_GST_UTIL_H_
+#endif  // GSTRADIO_SRC_GST_UTIL_H_

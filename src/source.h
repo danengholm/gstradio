@@ -1,4 +1,4 @@
-// Copyright 2026 The gsradio Authors
+// Copyright 2026 The gstradio Authors
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 // An input track: a file, FIFO or stdin ("-").
@@ -11,8 +11,8 @@
 // and excluded from the stream, garbage before the first frame is skipped,
 // trailing junk and truncated frames are trimmed, and bitrate / sample rate /
 // channels are extracted so that lazy re-encoding can be decided.
-#ifndef GSRADIO_SRC_SOURCE_H_
-#define GSRADIO_SRC_SOURCE_H_
+#ifndef GSTRADIO_SRC_SOURCE_H_
+#define GSTRADIO_SRC_SOURCE_H_
 
 #include <cstddef>
 #include <cstdint>
@@ -22,7 +22,7 @@
 #include <string>
 #include <vector>
 
-namespace gsradio {
+namespace gstradio {
 
 struct TrackTags {
     std::string artist;
@@ -82,6 +82,6 @@ class InputSource {
     TrackTags tags_;
 };
 
-}  // namespace gsradio
+}  // namespace gstradio
 
-#endif  // GSRADIO_SRC_SOURCE_H_
+#endif  // GSTRADIO_SRC_SOURCE_H_

@@ -1,4 +1,4 @@
-// Copyright 2026 The gsradio Authors
+// Copyright 2026 The gstradio Authors
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "src/metadata.h"
@@ -13,7 +13,7 @@
 #include "src/log.h"
 #include "src/shout_stream.h"
 
-namespace gsradio {
+namespace gstradio {
 
 std::string CleanFilename(std::string_view path) {
     if (auto slash = path.rfind('/'); slash != std::string_view::npos) {
@@ -103,4 +103,4 @@ void MetadataUpdater::Run(std::stop_token stop) {
     }
 }
 
-}  // namespace gsradio
+}  // namespace gstradio

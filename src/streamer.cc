@@ -1,4 +1,4 @@
-// Copyright 2026 The gsradio Authors
+// Copyright 2026 The gstradio Authors
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "src/streamer.h"
@@ -16,7 +16,7 @@
 #include "src/log.h"
 #include "src/signals.h"
 
-namespace gsradio {
+namespace gstradio {
 namespace {
 
 using Clock = std::chrono::steady_clock;
@@ -477,4 +477,4 @@ Streamer::Result Streamer::Play(InputSource& src, std::string& error) {
     return Result::kOk;
 }
 
-}  // namespace gsradio
+}  // namespace gstradio

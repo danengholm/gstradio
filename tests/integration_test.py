@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""End-to-end tests for gsradio against a fake Icecast server.
+"""End-to-end tests for gstradio against a fake Icecast server.
 
-Usage: integration_test.py /path/to/gsradio [test-name ...]
+Usage: integration_test.py /path/to/gstradio [test-name ...]
 
 Requires gst-launch-1.0 (with lame, vorbis, flac plugins), ffmpeg and ffprobe.
 Media is generated into a temporary directory.
@@ -17,9 +17,9 @@ import tempfile
 import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-GSRADIO = os.path.abspath(sys.argv[1])
+GSTRADIO = os.path.abspath(sys.argv[1])
 SELECTED = sys.argv[2:]
-WORK = tempfile.mkdtemp(prefix="gsradio-test-")
+WORK = tempfile.mkdtemp(prefix="gstradio-test-")
 MEDIA = os.path.join(WORK, "media")
 MODULES = os.path.join(HERE, "modules")
 PASSWORD = "hackme"
@@ -80,9 +80,9 @@ class Server:
         return os.path.join(self.dir, mount.strip("/") + ".mp3")
 
 
-def run_gsradio(args, timeout=60, env=None, cwd=None, sig_after=None):
-    full_env = dict(os.environ, GSRADIO_TEST_MEDIA=MEDIA, **(env or {}))
-    p = subprocess.Popen([GSRADIO] + args,
+def run_gstradio(args, timeout=60, env=None, cwd=None, sig_after=None):
+    full_env = dict(os.environ, GSTRADIO_TEST_MEDIA=MEDIA, **(env or {}))
+    p = subprocess.Popen([GSTRADIO] + args,
                          stdout=subprocess.PIPE,
                          stderr=subprocess.STDOUT,
                          text=True,
@@ -128,7 +128,7 @@ def media(name):
 def scripted(files):
     """Arguments + env for the 'play these files once' python playlist."""
     return ["-S", "python", "-M", "listpl"], {
-        "GSRADIO_TEST_LIST": ":".join(media(f) for f in files),
+        "GSTRADIO_TEST_LIST": ":".join(media(f) for f in files),
         "PYTHONPATH": MODULES
     }
 
@@ -176,7 +176,7 @@ def test_transcode_formats():
     try:
         args, env = scripted(["mp3_128.mp3", "vorbis.ogg", "mono.flac"])
         t0 = time.time()
-        rc, out = run_gsradio(
+        rc, out = run_gstradio(
             args + ["-D", WORK, "-p", str(srv.port), "-P", PASSWORD, "-m", "/t", "-R", "-b", "96"], env=env)
         elapsed = time.time() - t0
     finally:
@@ -208,8 +208,8 @@ def test_multi_stream_protocols():
 
     with open(conf, "w") as f:
         f.write('<?xml version="1.0"?>\n'
-                '<gsradio:Configuration '
-                'xmlns:gsradio="https://github.com/danengholm/gsradio">\n'
+                '<gstradio:Configuration '
+                'xmlns:gstradio="https://github.com/danengholm/gstradio">\n'
                 "<Playlist><Type>python</Type><Module>listpl</Module></Playlist>\n"
                 f"<Execution><BaseDirectory>{WORK}</BaseDirectory>"
                 "<Verbose>1</Verbose></Execution>\n" + stream(
@@ -219,10 +219,10 @@ def test_multi_stream_protocols():
                 stream("xaudiocast", "<Mountpoint>/lazy</Mountpoint>"
                        "<Bitrate>128</Bitrate><Reencode>1</Reencode>") +
                 stream("icy", "<Bitrate>32</Bitrate><Reencode>1</Reencode>"
-                       "<Channels>1</Channels>") + "</gsradio:Configuration>\n")
+                       "<Channels>1</Channels>") + "</gstradio:Configuration>\n")
     try:
         _, env = scripted(["mp3_128.mp3", "vorbis.ogg", "vbr22k.mp3", "mp3_128.mp3"])
-        rc, out = run_gsradio(["-c", conf], env=env)
+        rc, out = run_gstradio(["-c", conf], env=env)
     finally:
         srv.stop()
     check(rc == 0, f"exit status {rc}\n{out}")
@@ -250,7 +250,7 @@ def test_crossfade():
     srv = Server("xfade")
     try:
         args, env = scripted(["long1.flac", "long2.flac"])
-        rc, out = run_gsradio(
+        rc, out = run_gstradio(
             args + ["-D", WORK, "-p", str(srv.port), "-P", PASSWORD, "-m", "/xf", "-R", "-C", "3"], env=env)
     finally:
         srv.stop()
@@ -283,15 +283,15 @@ def test_perl_playlist():
     """Perl module: title override, undef falls back to tags, XS loading."""
     srv = Server("perl")
     try:
-        rc, out = run_gsradio(
+        rc, out = run_gstradio(
             ["-D", WORK, "-S", "perl", "-M", "testpl", "-p",
              str(srv.port), "-P", PASSWORD, "-m", "/pl", "-R"],
             cwd=MODULES,
             timeout=4.5,
-            env={"GSRADIO_TEST_LIST": media("mono.flac") + ":" + media("mp3_128.mp3")})
+            env={"GSTRADIO_TEST_LIST": media("mono.flac") + ":" + media("mp3_128.mp3")})
     finally:
         srv.stop()
-    check("pl: gsradio_init" in out and "pl: gsradio_shutdown" in out, out)
+    check("pl: gstradio_init" in out and "pl: gstradio_shutdown" in out, out)
     check(srv.titles("/pl")[:2] == ["Perl Override 1", "Artist A - Sine MP3"], f"titles {srv.titles('/pl')}")
 
 
@@ -304,18 +304,18 @@ def test_signals_and_daemon():
     with open(pl, "w") as f:
         f.write(f"{media('long1.flac')}\n{media('mp3_128.mp3')}\n")
     try:
-        rc, out = run_gsradio(
+        rc, out = run_gstradio(
             ["-B", "-v", "-D", base, "-F", pl, "-p",
              str(srv.port), "-P", PASSWORD, "-m", "/sig", "-R"])
         check(rc == 0 and "Into the land of the dreaded daemons" in out, out)
         time.sleep(1.5)
-        pid = int(open(os.path.join(base, "gsradio.pid")).read())
+        pid = int(open(os.path.join(base, "gstradio.pid")).read())
         os.kill(pid, signal.SIGUSR1)
         time.sleep(1)
-        os.rename(os.path.join(base, "gsradio.log"), os.path.join(base, "gsradio.log.1"))
+        os.rename(os.path.join(base, "gstradio.log"), os.path.join(base, "gstradio.log.1"))
         os.kill(pid, signal.SIGHUP)
         time.sleep(1)
-        cue = open(os.path.join(base, "gsradio.cue")).read().splitlines()
+        cue = open(os.path.join(base, "gstradio.cue")).read().splitlines()
         os.kill(pid, signal.SIGTERM)
         for _ in range(50):
             try:
@@ -327,14 +327,14 @@ def test_signals_and_daemon():
             raise AssertionError("daemon did not exit on SIGTERM")
     finally:
         srv.stop()
-    log1 = open(os.path.join(base, "gsradio.log.1")).read()
+    log1 = open(os.path.join(base, "gstradio.log.1")).read()
     check("skipping to next track" in log1, log1)
     check(srv.titles("/sig")[:2] == ["long1", "Artist A - Sine MP3"], srv.titles("/sig"))
-    check(os.path.exists(os.path.join(base, "gsradio.log")), "log not reopened after SIGHUP")
-    check("gsradio exiting..." in open(os.path.join(base, "gsradio.log")).read(), "no exit message")
+    check(os.path.exists(os.path.join(base, "gstradio.log")), "log not reopened after SIGHUP")
+    check("gstradio exiting..." in open(os.path.join(base, "gstradio.log")).read(), "no exit message")
     check(cue[0] == media("mp3_128.mp3") and cue[6:8] == ["Artist A", "Sine MP3"], f"cue {cue}")
-    check(not os.path.exists(os.path.join(base, "gsradio.pid")), "pid file left behind")
-    check(not os.path.exists(os.path.join(base, "gsradio.cue")), "cue file left behind")
+    check(not os.path.exists(os.path.join(base, "gstradio.pid")), "pid file left behind")
+    check(not os.path.exists(os.path.join(base, "gstradio.cue")), "cue file left behind")
 
 
 def test_error_handling():
@@ -344,7 +344,7 @@ def test_error_handling():
         f.write(f"{media('junk.mp3')}\n/nonexistent.mp3\n")
     srv = Server("errors")
     try:
-        rc, out = run_gsradio(["-D", WORK, "-F", pl, "-p", str(srv.port), "-P", PASSWORD, "-R"])
+        rc, out = run_gstradio(["-D", WORK, "-F", pl, "-p", str(srv.port), "-P", PASSWORD, "-R"])
     finally:
         srv.stop()
     check(rc == 1 and "Exiting after 10 consecutive errors." in out, out)
@@ -353,7 +353,7 @@ def test_error_handling():
 
     with open(pl, "w") as f:
         f.write(f"{media('mp3_128.mp3')}\n")
-    rc, out = run_gsradio(["-D", WORK, "-F", pl, "-p", "1", "-R"])
+    rc, out = run_gstradio(["-D", WORK, "-F", pl, "-p", "1", "-R"])
     check(rc == 1 and "Too many stream errors, giving up" in out, out)
 
 
@@ -365,7 +365,7 @@ def test_stdin():
         f.write("-\n")
     try:
         with open(media("vorbis.ogg"), "rb") as stdin:
-            p = subprocess.run([GSRADIO, "-D", WORK, "-F", pl, "-p",
+            p = subprocess.run([GSTRADIO, "-D", WORK, "-F", pl, "-p",
                                 str(srv.port), "-P", PASSWORD, "-m", "/in", "-R"],
                                stdin=stdin,
                                capture_output=True,
@@ -379,31 +379,31 @@ def test_stdin():
 
 
 def test_command_line():
-    rc, out = run_gsradio(["-V"])
-    check(rc == 0 and out.startswith("gsradio 0.4"), out)
-    rc, out = run_gsradio(["-Z"])
+    rc, out = run_gstradio(["-V"])
+    check(rc == 0 and out.startswith("gstradio 0.5"), out)
+    rc, out = run_gstradio(["-Z"])
     check(rc == 1 and "Unknown option: -Z" in out, out)
-    rc, out = run_gsradio(["-c", "/nonexistent.conf"])
+    rc, out = run_gstradio(["-c", "/nonexistent.conf"])
     check(rc == 1, out)
     pl = os.path.join(WORK, "empty_cmd.txt")
     with open(pl, "w") as f:
         pass
-    rc, out = run_gsradio(["-D", WORK, "-F", pl])
+    rc, out = run_gstradio(["-D", WORK, "-F", pl])
     check(out.splitlines()[0] == "Logfile opened", out)
-    rc, out = run_gsradio(["-D", WORK, "-T", "%Y", "-F", pl])
+    rc, out = run_gstradio(["-D", WORK, "-T", "%Y", "-F", pl])
     year = time.strftime("%Y")
     check(out.splitlines()[0] == f"{year} Logfile opened", out)
-    rc, out = run_gsradio(["-D", WORK, "-T", "-F", pl])
+    rc, out = run_gstradio(["-D", WORK, "-T", "-F", pl])
     first = out.splitlines()[0]
     check(first.endswith(" Logfile opened") and len(first) > len(" Logfile opened"), out)
     ts_conf = os.path.join(WORK, "ts.conf")
     with open(ts_conf, "w") as f:
         f.write('<?xml version="1.0"?>\n'
-                '<gsradio:Configuration xmlns:gsradio="https://github.com/danengholm/gsradio">\n'
+                '<gstradio:Configuration xmlns:gstradio="https://github.com/danengholm/gstradio">\n'
                 f"<Playlist><File>{pl}</File></Playlist>\n"
                 f"<Execution><BaseDirectory>{WORK}</BaseDirectory><Timestamp>%Y</Timestamp></Execution>\n"
-                "</gsradio:Configuration>\n")
-    rc, out = run_gsradio(["-c", ts_conf])
+                "</gstradio:Configuration>\n")
+    rc, out = run_gstradio(["-c", ts_conf])
     check(out.splitlines()[0] == f"{year} Logfile opened", out)
 
 

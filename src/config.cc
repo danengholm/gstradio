@@ -1,4 +1,4 @@
-// Copyright 2026 The gsradio Authors
+// Copyright 2026 The gstradio Authors
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "src/config.h"
@@ -23,7 +23,7 @@
 #include "src/build_config.h"
 #include "src/log.h"
 
-namespace gsradio {
+namespace gstradio {
 
 std::string_view ToString(Protocol p) {
     switch (p) {
@@ -53,7 +53,7 @@ bool Config::AnyReencode() const { return std::ranges::any_of(streams, &StreamCo
 
 namespace {
 
-constexpr std::string_view kConfigNamespace = "https://github.com/danengholm/gsradio";
+constexpr std::string_view kConfigNamespace = "https://github.com/danengholm/gstradio";
 
 // atoi() semantics (leading whitespace, optional sign, trailing junk ignored,
 // 0 on failure) to stay compatible with existing configuration files.
@@ -386,7 +386,7 @@ std::expected<void, std::string> ParseConfigFile(Config& config, const std::stri
     }
 
     if (!xmlSearchNsByHref(doc.get(), root, reinterpret_cast<const xmlChar*>(kConfigNamespace.data()))) {
-        return std::unexpected("XML Parser: Document of invalid type, no gsradio namespace found");
+        return std::unexpected("XML Parser: Document of invalid type, no gstradio namespace found");
     }
     if (NodeName(root) != "Configuration") {
         return std::unexpected(
@@ -448,8 +448,8 @@ std::expected<Config, ExitRequest> LoadConfig(int argc, char** argv) {
 
 void PrintUsage() {
     std::print(
-        "This is gsradio {}\n"
-        "gsradio <options>\n"
+        "This is gstradio {}\n"
+        "gstradio <options>\n"
         "Options:\n"
         "\t-B (Background (daemon mode))\n"
         "\t-b <stream bitrate>\n"
@@ -486,8 +486,8 @@ void PrintVersion() {
     if constexpr (build::kHavePerl) features += " Perl";
     if constexpr (build::kHavePython) features += " python";
     std::print(
-        "gsradio {}\nFeatures: {}\nSystem configuration file: "
-        "{}/gsradio.conf\n",
+        "gstradio {}\nFeatures: {}\nSystem configuration file: "
+        "{}/gstradio.conf\n",
         build::kPackageVersion, features, build::kEtcDir);
     if constexpr (build::kHavePerl || build::kHavePython) {
         std::print("Playlist module directory: {}\n", build::kModuleDir);
@@ -512,4 +512,4 @@ void LogConfig(const Config& config) {
     }
 }
 
-}  // namespace gsradio
+}  // namespace gstradio

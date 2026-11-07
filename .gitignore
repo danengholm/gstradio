@@ -2,7 +2,7 @@ build/
 *.o
 __pycache__/
 *.swp
-/gsradio
+/gstradio
 /config.mk
 /config.log
 /src/build_config.h

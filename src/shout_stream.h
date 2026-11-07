@@ -1,12 +1,12 @@
-// Copyright 2026 The gsradio Authors
+// Copyright 2026 The gstradio Authors
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 // A libshout connection to one mountpoint. Connection and error handling
 // follow IceS 0.4 stream.c: connections are opened lazily on first send,
 // retried at most once per second, and every failure increments a
 // consecutive error counter.
-#ifndef GSRADIO_SRC_SHOUT_STREAM_H_
-#define GSRADIO_SRC_SHOUT_STREAM_H_
+#ifndef GSTRADIO_SRC_SHOUT_STREAM_H_
+#define GSTRADIO_SRC_SHOUT_STREAM_H_
 
 #include <shout/shout.h>
 
@@ -20,7 +20,7 @@
 
 #include "src/config.h"
 
-namespace gsradio {
+namespace gstradio {
 
 class ShoutStream {
  public:
@@ -72,6 +72,6 @@ class ShoutStream {
 // Applies the server settings of `config` to a shout_t.
 void ConfigureShout(shout_t* shout, const StreamConfig& config);
 
-}  // namespace gsradio
+}  // namespace gstradio
 
-#endif  // GSRADIO_SRC_SHOUT_STREAM_H_
+#endif  // GSTRADIO_SRC_SHOUT_STREAM_H_

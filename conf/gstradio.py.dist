@@ -1,30 +1,30 @@
-# Skeleton gsradio playlist module for Python 3.
-# Copy to gsradio.py (in the playlist module directory or the directory gsradio is
+# Skeleton gstradio playlist module for Python 3.
+# Copy to gstradio.py (in the playlist module directory or the directory gstradio is
 # started from) and select it with <Type>python</Type> or -S python.
 #
-# Only gsradio_get_next must be defined; the other functions are optional.
+# Only gstradio_get_next must be defined; the other functions are optional.
 
 songnumber = -1
 
 
 # Function called to initialize your python environment.
 # Should return 1 if ok, and 0 if something went wrong. A negative value
-# makes gsradio exit.
-def gsradio_init():
+# makes gstradio exit.
+def gstradio_init():
     print('Executing initialize() function..')
     return 1
 
 
 # Function called to shutdown your python enviroment.
 # Return 1 if ok, 0 if something went wrong.
-def gsradio_shutdown():
+def gstradio_shutdown():
     print('Executing shutdown() function...')
     return 1
 
 
 # Function called to get the next filename to stream.
 # Should return a string.
-def gsradio_get_next():
+def gstradio_get_next():
     print('Executing get_next() function...')
     return 'Very nice song.mp3'
 
@@ -32,14 +32,14 @@ def gsradio_get_next():
 # This function, if defined, returns the string you'd like used
 # as metadata (ie for title streaming) for the current song. You may
 # return None to indicate that the file comment should be used.
-def gsradio_get_metadata():
+def gstradio_get_metadata():
     return 'Artist - Title (Label, Year)'
 
 
 # Function used to put the current line number of
 # the playlist in the cue file. If you don't care about this number
 # don't use it.
-def gsradio_get_lineno():
+def gstradio_get_lineno():
     global songnumber
     print('Executing get_lineno() function...')
     songnumber = songnumber + 1

@@ -1,4 +1,4 @@
-// Copyright 2026 The gsradio Authors
+// Copyright 2026 The gstradio Authors
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "src/decoder.h"
@@ -12,7 +12,7 @@
 
 #include "src/log.h"
 
-namespace gsradio {
+namespace gstradio {
 namespace {
 
 // Keep at most this much compressed data queued in front of the decoder.
@@ -137,4 +137,4 @@ std::optional<double> Decoder::QueryDurationSeconds() const {
     return std::nullopt;
 }
 
-}  // namespace gsradio
+}  // namespace gstradio

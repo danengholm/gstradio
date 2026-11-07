@@ -1,4 +1,4 @@
-// Copyright 2026 The gsradio Authors
+// Copyright 2026 The gstradio Authors
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 // The streaming loop (IceS 0.4 stream.c).
@@ -11,8 +11,8 @@
 //            stream's settings (always the case for Ogg Vorbis and FLAC)
 // Chunks are read once and fanned out to every stream; libshout paces the
 // output to real time.
-#ifndef GSRADIO_SRC_STREAMER_H_
-#define GSRADIO_SRC_STREAMER_H_
+#ifndef GSTRADIO_SRC_STREAMER_H_
+#define GSTRADIO_SRC_STREAMER_H_
 
 #include <cstdint>
 #include <expected>
@@ -31,7 +31,7 @@
 #include "src/shout_stream.h"
 #include "src/source.h"
 
-namespace gsradio {
+namespace gstradio {
 
 class Streamer {
  public:
@@ -90,6 +90,6 @@ class Streamer {
     std::string song_;  // Current title.
 };
 
-}  // namespace gsradio
+}  // namespace gstradio
 
-#endif  // GSRADIO_SRC_STREAMER_H_
+#endif  // GSTRADIO_SRC_STREAMER_H_

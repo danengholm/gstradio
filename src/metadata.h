@@ -1,17 +1,17 @@
-// Copyright 2026 The gsradio Authors
+// Copyright 2026 The gstradio Authors
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 // Title streaming (IceS 0.4 metadata.c).
 //
 // The song title is, in order of preference: the playlist module's
-// gsradio_get_metadata() result, "Artist - Title" / "Title" from the file's
+// gstradio_get_metadata() result, "Artist - Title" / "Title" from the file's
 // tags, or the file name without directory and extension.
 //
 // Updates are sent from a background thread (the original forked) so a slow
 // server never stalls the audio. The first update after a (re)connection is
 // delayed by 0.5 s so the server has registered the new source.
-#ifndef GSRADIO_SRC_METADATA_H_
-#define GSRADIO_SRC_METADATA_H_
+#ifndef GSTRADIO_SRC_METADATA_H_
+#define GSTRADIO_SRC_METADATA_H_
 
 #include <chrono>
 #include <condition_variable>
@@ -26,7 +26,7 @@
 #include "src/config.h"
 #include "src/source.h"
 
-namespace gsradio {
+namespace gstradio {
 
 [[nodiscard]] std::string CleanFilename(std::string_view path);
 [[nodiscard]] std::string ComposeSongTitle(const std::optional<std::string>& playlist_metadata, const TrackTags& tags,
@@ -57,6 +57,6 @@ class MetadataUpdater {
     std::jthread worker_;           // last: started after the members above exist
 };
 
-}  // namespace gsradio
+}  // namespace gstradio
 
-#endif  // GSRADIO_SRC_METADATA_H_
+#endif  // GSTRADIO_SRC_METADATA_H_

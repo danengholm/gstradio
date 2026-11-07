@@ -1,4 +1,4 @@
-// Copyright 2026 The gsradio Authors
+// Copyright 2026 The gstradio Authors
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 // Per-stream MP3 encoder:
@@ -8,8 +8,8 @@
 //
 // The encoder is long-lived: it keeps running across track changes, so
 // consecutive re-encoded tracks are joined gaplessly.
-#ifndef GSRADIO_SRC_ENCODER_H_
-#define GSRADIO_SRC_ENCODER_H_
+#ifndef GSTRADIO_SRC_ENCODER_H_
+#define GSTRADIO_SRC_ENCODER_H_
 
 #include <gst/app/gstappsink.h>
 #include <gst/app/gstappsrc.h>
@@ -24,7 +24,7 @@
 
 #include "src/gst_util.h"
 
-namespace gsradio {
+namespace gstradio {
 
 // The output sample rate LAME picks by default for a given input rate and
 // bitrate (queried from liblame when available).
@@ -67,6 +67,6 @@ class Encoder {
     std::uint64_t frames_pushed_ = 0;
 };
 
-}  // namespace gsradio
+}  // namespace gstradio
 
-#endif  // GSRADIO_SRC_ENCODER_H_
+#endif  // GSTRADIO_SRC_ENCODER_H_

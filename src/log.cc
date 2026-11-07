@@ -1,4 +1,4 @@
-// Copyright 2026 The gsradio Authors
+// Copyright 2026 The gstradio Authors
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "src/log.h"
@@ -13,7 +13,7 @@
 #include <print>
 #include <string>
 
-namespace gsradio::log {
+namespace gstradio::log {
 namespace {
 
 struct State {
@@ -64,7 +64,7 @@ std::expected<void, std::string> Open(const std::filesystem::path& base_director
     auto& s = GetState();
     std::scoped_lock lock(s.mutex);
     CloseLocked(s);
-    s.path = base_directory / "gsradio.log";
+    s.path = base_directory / "gstradio.log";
     return OpenLocked(s);
 }
 
@@ -115,4 +115,4 @@ void Write(std::string_view message, bool is_debug) {
     }
 }
 
-}  // namespace gsradio::log
+}  // namespace gstradio::log

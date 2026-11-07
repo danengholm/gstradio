@@ -1,39 +1,39 @@
-# Skeleton gsradio playlist module for Perl.
-# Copy to gsradio.pm (in the playlist module directory or the directory gsradio is
+# Skeleton gstradio playlist module for Perl.
+# Copy to gstradio.pm (in the playlist module directory or the directory gstradio is
 # started from) and select it with <Type>perl</Type> or -S perl.
 #
-# At least gsradio_get_next must be defined. And, like all perl modules, it
+# At least gstradio_get_next must be defined. And, like all perl modules, it
 # must return 1 at the end.
 
 # Function called to initialize your perl environment.
 # Should return 1 if ok, and 0 if something went wrong.
-sub gsradio_init {
+sub gstradio_init {
 	print "Perl subsystem Initializing:\n";
 	return 1;
 }
 
 # Function called to shutdown your perl enviroment.
 # Return 1 if ok, 0 if something went wrong.
-sub gsradio_shutdown {
+sub gstradio_shutdown {
 	print "Perl subsystem shutting down:\n";
 }
 
 # Function called to get the next filename to stream.
 # Should return a string.
-sub gsradio_get_next {
+sub gstradio_get_next {
 	print "Perl subsystem quering for new track:\n";
 	return "/home/chad/music/A Perfect Circle - Reinholder.mp3";
 }
 
 # If defined, the return value is used for title streaming (metadata)
-sub gsradio_get_metadata {
+sub gstradio_get_metadata {
         return "Artist - Title (Album, Year)";
 }
 
 # Function used to put the current line number of
 # the playlist in the cue file. If you don't care
 # about cue files, just return any integer.
-sub gsradio_get_lineno {
+sub gstradio_get_lineno {
 	return 1;
 }
 

@@ -1,4 +1,4 @@
-// Copyright 2026 The gsradio Authors
+// Copyright 2026 The gstradio Authors
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "src/signals.h"
@@ -8,7 +8,7 @@
 #include <csignal>
 #include <thread>
 
-namespace gsradio::signals {
+namespace gstradio::signals {
 namespace {
 
 std::atomic<bool> g_quit{false};
@@ -57,4 +57,4 @@ void InterruptibleSleep(std::chrono::milliseconds duration) {
     }
 }
 
-}  // namespace gsradio::signals
+}  // namespace gstradio::signals

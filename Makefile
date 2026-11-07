@@ -1,7 +1,7 @@
-# Copyright 2026 The gsradio Authors
+# Copyright 2026 The gstradio Authors
 # SPDX-License-Identifier: GPL-2.0-or-later
 #
-# Makefile for gsradio. Run ./configure first; it writes config.mk.
+# Makefile for gstradio. Run ./configure first; it writes config.mk.
 # Only POSIX make features are used, so BSD make and GNU make both work.
 
 .POSIX:
@@ -47,10 +47,10 @@ HDRS = \
 	src/source.h \
 	src/streamer.h
 
-all: gsradio
+all: gstradio
 
-gsradio: $(OBJS)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o gsradio $(OBJS) $(LIBS)
+gstradio: $(OBJS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o gstradio $(OBJS) $(LIBS)
 
 $(OBJS): $(HDRS) config.mk
 
@@ -61,26 +61,26 @@ $(OBJS): $(HDRS) config.mk
 .c.o:
 	$(CC) $(CPPFLAGS) -I. $(PERL_CFLAGS) $(CFLAGS) -c -o $@ $<
 
-install: gsradio
+install: gstradio
 	mkdir -p $(DESTDIR)$(BINDIR) $(DESTDIR)$(MANDIR)/man1
 	mkdir -p $(DESTDIR)$(CONF_DIST_DIR) $(DESTDIR)$(MODULE_DIST_DIR)
-	$(INSTALL) -m 755 gsradio $(DESTDIR)$(BINDIR)/gsradio
-	$(INSTALL) -m 644 doc/gsradio.1 $(DESTDIR)$(MANDIR)/man1/gsradio.1
-	$(INSTALL) -m 644 conf/gsradio.conf.dist $(DESTDIR)$(CONF_DIST_DIR)/gsradio.conf.dist
-	$(INSTALL) -m 644 conf/gsradio.py.dist $(DESTDIR)$(MODULE_DIST_DIR)/gsradio.py.dist
-	$(INSTALL) -m 644 conf/gsradio.pm.dist $(DESTDIR)$(MODULE_DIST_DIR)/gsradio.pm.dist
+	$(INSTALL) -m 755 gstradio $(DESTDIR)$(BINDIR)/gstradio
+	$(INSTALL) -m 644 doc/gstradio.1 $(DESTDIR)$(MANDIR)/man1/gstradio.1
+	$(INSTALL) -m 644 conf/gstradio.conf.dist $(DESTDIR)$(CONF_DIST_DIR)/gstradio.conf.dist
+	$(INSTALL) -m 644 conf/gstradio.py.dist $(DESTDIR)$(MODULE_DIST_DIR)/gstradio.py.dist
+	$(INSTALL) -m 644 conf/gstradio.pm.dist $(DESTDIR)$(MODULE_DIST_DIR)/gstradio.pm.dist
 
 uninstall:
-	rm -f $(DESTDIR)$(BINDIR)/gsradio $(DESTDIR)$(MANDIR)/man1/gsradio.1
-	rm -f $(DESTDIR)$(CONF_DIST_DIR)/gsradio.conf.dist
-	rm -f $(DESTDIR)$(MODULE_DIST_DIR)/gsradio.py.dist $(DESTDIR)$(MODULE_DIST_DIR)/gsradio.pm.dist
+	rm -f $(DESTDIR)$(BINDIR)/gstradio $(DESTDIR)$(MANDIR)/man1/gstradio.1
+	rm -f $(DESTDIR)$(CONF_DIST_DIR)/gstradio.conf.dist
+	rm -f $(DESTDIR)$(MODULE_DIST_DIR)/gstradio.py.dist $(DESTDIR)$(MODULE_DIST_DIR)/gstradio.pm.dist
 
 # Integration tests (need gst-launch-1.0, ffmpeg and ffprobe).
-check: gsradio
-	tests/run_tests.sh ./gsradio
+check: gstradio
+	tests/run_tests.sh ./gstradio
 
 clean:
-	rm -f gsradio src/*.o
+	rm -f gstradio src/*.o
 
 distclean: clean
 	rm -f config.mk config.log src/build_config.h

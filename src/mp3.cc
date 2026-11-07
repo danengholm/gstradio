@@ -1,11 +1,11 @@
-// Copyright 2026 The gsradio Authors
+// Copyright 2026 The gstradio Authors
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "src/mp3.h"
 
 #include <array>
 
-namespace gsradio::mp3 {
+namespace gstradio::mp3 {
 namespace {
 
 constexpr int kModeMono = 3;
@@ -116,4 +116,4 @@ std::optional<std::size_t> Id3v2Size(std::span<const std::uint8_t> b) {
     return size;
 }
 
-}  // namespace gsradio::mp3
+}  // namespace gstradio::mp3

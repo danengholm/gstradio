@@ -1,10 +1,10 @@
-// Copyright 2026 The gsradio Authors
+// Copyright 2026 The gstradio Authors
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 // MPEG audio frame header parsing (port of IceS 0.4 mp3.c).
 // Reference: http://mpgedit.org/mpgedit/mpeg_format/mpeghdr.htm
-#ifndef GSRADIO_SRC_MP3_H_
-#define GSRADIO_SRC_MP3_H_
+#ifndef GSTRADIO_SRC_MP3_H_
+#define GSTRADIO_SRC_MP3_H_
 
 #include <cstddef>
 #include <cstdint>
@@ -12,7 +12,7 @@
 #include <span>
 #include <string_view>
 
-namespace gsradio::mp3 {
+namespace gstradio::mp3 {
 
 struct Header {
     int version = 0;  // 0 = MPEG-1, 1 = MPEG-2 LSF, 2 = MPEG-2.5
@@ -50,6 +50,6 @@ bool SameStream(const Header& a, const Header& b);
 // ID3v2 tag size (including header and footer) if `bytes` begins with one.
 [[nodiscard]] std::optional<std::size_t> Id3v2Size(std::span<const std::uint8_t> bytes);
 
-}  // namespace gsradio::mp3
+}  // namespace gstradio::mp3
 
-#endif  // GSRADIO_SRC_MP3_H_
+#endif  // GSTRADIO_SRC_MP3_H_

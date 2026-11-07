@@ -1,6 +1,6 @@
-# gsradio — IceS 0.4 for the GStreamer era
+# gstradio — IceS 0.4 for the GStreamer era
 
-`gsradio` streams a playlist to an [Icecast](https://icecast.org/) (or
+`gstradio` streams a playlist to an [Icecast](https://icecast.org/) (or
 Shoutcast) server as MP3. It is a C++23 reimplementation of **IceS 0.4**
 ("ices0"), the last release of the original IceS line. It keeps ices0's
 on-the-fly **transcoding** of Ogg Vorbis, FLAC and MP3 into MP3, which the
@@ -9,7 +9,7 @@ GStreamer; the server connection uses libshout.
 
 It has IceS 0.4's command line options, features and behaviour, under its own
 name: the program, configuration file, XML namespace, playlist script hooks
-and the files it writes are all called `gsradio`. See
+and the files it writes are all called `gstradio`. See
 [Migrating from IceS 0.4](#migrating-from-ices-04) to convert existing setups.
 
 ## Building
@@ -37,9 +37,9 @@ Then:
 `./configure --help` lists the options. The useful ones:
 
 * `--prefix=DIR`, `--bindir=DIR`, `--mandir=DIR`: installation directories.
-* `--sysconfdir=DIR`: where `gsradio.conf` is looked up (default `PREFIX/etc`).
+* `--sysconfdir=DIR`: where `gstradio.conf` is looked up (default `PREFIX/etc`).
 * `--with-moduledir=DIR`: playlist module directory (default
-  `SYSCONFDIR/gsradio/modules`).
+  `SYSCONFDIR/gstradio/modules`).
 * `--with-examplesdir=DIR`: install the sample configuration files into DIR
   instead of the two directories above, for packaging.
 * `--disable-python` and `--disable-perl`: leave out scripted playlists
@@ -55,16 +55,16 @@ The compiler and flags come from `CC`, `CXX`, `CFLAGS`, `CXXFLAGS`,
 ## Quick start
 
     ls ~/music/*.{mp3,ogg,flac} > playlist.txt
-    gsradio -F playlist.txt -h icecast.example.com -P sourcepass -m /radio -R -b 128
+    gstradio -F playlist.txt -h icecast.example.com -P sourcepass -m /radio -R -b 128
 
 `-R` turns on re-encoding, which is needed for Ogg Vorbis and FLAC files. Or
-copy `conf/gsradio.conf.dist` to `gsradio.conf`, edit it, and run `gsradio -c gsradio.conf`.
-See `man gsradio` (`doc/gsradio.1`) for every option.
+copy `conf/gstradio.conf.dist` to `gstradio.conf`, edit it, and run `gstradio -c gstradio.conf`.
+See `man gstradio` (`doc/gstradio.1`) for every option.
 
 Several streams can be fed from one playlist, e.g. a pass-through 128 kbps
 stream plus a 32 kbps mono stream for narrowband listeners:
 
-    gsradio -F playlist.txt -P pass -m /hi -b 128 -m /lo -b 32 -R -N 1
+    gstradio -F playlist.txt -P pass -m /hi -b 128 -m /lo -b 32 -R -N 1
 
 (Each `-m` starts a new stream; options that follow it apply to that stream.)
 
@@ -91,7 +91,7 @@ the audio.
 | Feature | Status |
 |---|---|
 | All command line options (`-B -b -C -c -D -d -F -f -g -H -h -i -M -m -N -n -P -p -R -r -S -s -T -t -u -V -v`) | ✔ |
-| XML config (`Configuration` root, `Playlist`/`Execution`/multiple `Stream` sections) | ✔ (gsradio namespace) |
+| XML config (`Configuration` root, `Playlist`/`Execution`/multiple `Stream` sections) | ✔ (gstradio namespace) |
 | Config lookup: given path, then `SYSCONFDIR/<file>`; command line overrides config | ✔ |
 | Multiple streams from one playlist, each with its own server/mount/encoding | ✔ |
 | Protocols `http` (Icecast 2), `xaudiocast` (Icecast 1), `icy` (Shoutcast) | ✔ |
@@ -102,10 +102,10 @@ the audio.
 | Transcoding Ogg Vorbis and FLAC to MP3 | ✔ (plus anything GStreamer decodes) |
 | Crossfading (`-C`/`<Crossfade>`), linear, short-track rule | ✔ |
 | Builtin playlist: randomize, reload on change, wrap around | ✔ |
-| Python and Perl playlist modules (`init/shutdown/get_next/get_metadata/get_lineno` hooks) | ✔ (Python 3, `gsradio_` names) |
+| Python and Perl playlist modules (`init/shutdown/get_next/get_metadata/get_lineno` hooks) | ✔ (Python 3, `gstradio_` names) |
 | Title streaming from script, ID3/Vorbis comment tags, or the file name; delayed update after connect | ✔ |
 | Reading audio from stdin (`-` in the playlist) or a FIFO | ✔ |
-| Log, cue (same 8-line format) and pid files in the base directory | ✔ (`gsradio.*`) |
+| Log, cue (same 8-line format) and pid files in the base directory | ✔ (`gstradio.*`) |
 | SIGINT/SIGTERM shutdown, SIGHUP log reopen + playlist reload, SIGUSR1 skip | ✔ |
 | Daemon mode with the original messages | ✔ |
 | Exits after more than 10 consecutive bad tracks or more than 10 consecutive stream errors | ✔ |
@@ -115,10 +115,10 @@ the audio.
 These either fix bugs in ices0 or are unavoidable with modern libraries:
 
 * Python modules run on **Python 3** (ices0 used Python 2). The sample module
-  `conf/gsradio.py.dist` has been ported.
+  `conf/gstradio.py.dist` has been ported.
 * **Crossfading requires every stream to re-encode.** ices0 fed pass-through
   streams unfaded data, so they drifted further ahead with every track. If any
-  stream has `Reencode` 0, gsradio logs a warning and disables crossfading.
+  stream has `Reencode` 0, gstradio logs a warning and disables crossfading.
 * Builtin playlist: blank lines and `#` comments (for example M3U headers) are
   skipped. In ices0 a blank line could stop the stream. Randomized playlists
   are reshuffled on every pass (ices0 shuffled once), and SIGHUP also re-reads
@@ -142,34 +142,34 @@ These either fix bugs in ices0 or are unavoidable with modern libraries:
 
 Everything IceS 0.4 could do works the same way, but the names have changed:
 
-| IceS 0.4 | gsradio |
+| IceS 0.4 | gstradio |
 |---|---|
-| `ices` program, `ices(1)` | `gsradio`, `gsradio(1)` |
-| `ices.conf` | `gsradio.conf` |
-| `xmlns:ices="http://www.icecast.org/projects/ices"`, `<ices:Configuration>` | `xmlns:gsradio="https://github.com/danengholm/gsradio"`, `<gsradio:Configuration>` |
-| `ices.log`, `ices.cue`, `ices.pid` | `gsradio.log`, `gsradio.cue`, `gsradio.pid` |
-| default playlist module `ices` (`ices.py`, `ices.pm`) | `gsradio` (`gsradio.py`, `gsradio.pm`) |
-| module directory `…/etc/ices/modules` | `…/etc/gsradio/modules` |
-| `ices_init`, `ices_shutdown`, `ices_get_next`, `ices_get_metadata`, `ices_get_lineno` | `gsradio_init`, `gsradio_shutdown`, `gsradio_get_next`, `gsradio_get_metadata`, `gsradio_get_lineno` |
+| `ices` program, `ices(1)` | `gstradio`, `gstradio(1)` |
+| `ices.conf` | `gstradio.conf` |
+| `xmlns:ices="http://www.icecast.org/projects/ices"`, `<ices:Configuration>` | `xmlns:gstradio="https://github.com/danengholm/gstradio"`, `<gstradio:Configuration>` |
+| `ices.log`, `ices.cue`, `ices.pid` | `gstradio.log`, `gstradio.cue`, `gstradio.pid` |
+| default playlist module `ices` (`ices.py`, `ices.pm`) | `gstradio` (`gstradio.py`, `gstradio.pm`) |
+| module directory `…/etc/ices/modules` | `…/etc/gstradio/modules` |
+| `ices_init`, `ices_shutdown`, `ices_get_next`, `ices_get_metadata`, `ices_get_lineno` | `gstradio_init`, `gstradio_shutdown`, `gstradio_get_next`, `gstradio_get_metadata`, `gstradio_get_lineno` |
 | legacy `ices_python_*` / `ices_perl_*` hook names | not supported |
-| default mount `/ices` | `/gsradio` |
+| default mount `/ices` | `/gstradio` |
 
 The element names inside the configuration file are unchanged, so converting an
 `ices.conf` only needs the namespace and prefix replaced:
 
-    sed -e 's|http://www.icecast.org/projects/ices|https://github.com/danengholm/gsradio|' \
-        -e 's|ices:Configuration|gsradio:Configuration|g' -e 's|xmlns:ices=|xmlns:gsradio=|' \
-        ices.conf > gsradio.conf
+    sed -e 's|http://www.icecast.org/projects/ices|https://github.com/danengholm/gstradio|' \
+        -e 's|ices:Configuration|gstradio:Configuration|g' -e 's|xmlns:ices=|xmlns:gstradio=|' \
+        ices.conf > gstradio.conf
 
-Playlist scripts need their functions renamed from `ices_*` to `gsradio_*`.
+Playlist scripts need their functions renamed from `ices_*` to `gstradio_*`.
 Python modules also need porting to Python 3.
 
 ## Tests
 
     make check
-    # or: python3 tests/integration_test.py ./gsradio [test-name ...]
+    # or: python3 tests/integration_test.py ./gstradio [test-name ...]
 
-The integration suite generates test media, runs `gsradio` against a fake Icecast
+The integration suite generates test media, runs `gstradio` against a fake Icecast
 server (`tests/fake_icecast.py`, which speaks HTTP, x-audiocast and ICY),
 and checks titles, formats, durations, real-time pacing, crossfade shape,
 signals, daemon mode, stdin input and error handling. It needs
@@ -192,7 +192,7 @@ The settings live in `.clang-format`, `.style.yapf` and `CPPLINT.cfg`:
 clang-format's aligned array initializers as namespace indentation, and it reports
 `if (init; condition) statement;` as having multiple statements.
 
-The function names `gsradio_init`, `gsradio_get_next`, … in the playlist modules are the
+The function names `gstradio_init`, `gstradio_get_next`, … in the playlist modules are the
 public scripting API and are kept in that form. The Perl glue (`src/perl_glue.c`) is C
 and uses C naming.
 

@@ -1,4 +1,4 @@
-// Copyright 2026 The gsradio Authors
+// Copyright 2026 The gstradio Authors
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 // Signal handling as in IceS 0.4:
@@ -7,12 +7,12 @@
 //   SIGUSR1         skip to the next track
 //   SIGPIPE/SIGIO/SIGALRM ignored
 // Handlers only set flags; the streaming loop acts on them.
-#ifndef GSRADIO_SRC_SIGNALS_H_
-#define GSRADIO_SRC_SIGNALS_H_
+#ifndef GSTRADIO_SRC_SIGNALS_H_
+#define GSTRADIO_SRC_SIGNALS_H_
 
 #include <chrono>
 
-namespace gsradio::signals {
+namespace gstradio::signals {
 
 void Install();
 
@@ -26,6 +26,6 @@ void RequestQuit();
 // Sleep for up to `duration`, returning early if a shutdown is requested.
 void InterruptibleSleep(std::chrono::milliseconds duration);
 
-}  // namespace gsradio::signals
+}  // namespace gstradio::signals
 
-#endif  // GSRADIO_SRC_SIGNALS_H_
+#endif  // GSTRADIO_SRC_SIGNALS_H_

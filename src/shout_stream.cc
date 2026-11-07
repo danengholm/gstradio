@@ -1,4 +1,4 @@
-// Copyright 2026 The gsradio Authors
+// Copyright 2026 The gstradio Authors
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "src/shout_stream.h"
@@ -12,10 +12,10 @@
 #include "src/build_config.h"
 #include "src/log.h"
 
-namespace gsradio {
+namespace gstradio {
 
 std::string ShoutStream::UserAgent() {
-    return std::format("gsradio/{} libshout/{}", build::kPackageVersion, shout_version(nullptr, nullptr, nullptr));
+    return std::format("gstradio/{} libshout/{}", build::kPackageVersion, shout_version(nullptr, nullptr, nullptr));
 }
 
 void ConfigureShout(shout_t* s, const StreamConfig& c) {
@@ -110,4 +110,4 @@ ShoutStream::SendResult ShoutStream::Send(std::span<const std::uint8_t> data) {
     return SendResult::kFailed;
 }
 
-}  // namespace gsradio
+}  // namespace gstradio

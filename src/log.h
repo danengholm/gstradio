@@ -1,14 +1,14 @@
-// Copyright 2026 The gsradio Authors
+// Copyright 2026 The gstradio Authors
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 // Logging, modelled on IceS 0.4's log.c:
-//  * every message goes to <basedir>/gsradio.log (opened in append mode) and,
+//  * every message goes to <basedir>/gstradio.log (opened in append mode) and,
 //    unless running as a daemon, to stdout;
 //  * debug messages are only emitted in verbose mode and carry a "DEBUG: "
 //    prefix;
 //  * SIGHUP closes and reopens the log file (for log rotation).
-#ifndef GSRADIO_SRC_LOG_H_
-#define GSRADIO_SRC_LOG_H_
+#ifndef GSTRADIO_SRC_LOG_H_
+#define GSTRADIO_SRC_LOG_H_
 
 #include <expected>
 #include <filesystem>
@@ -18,7 +18,7 @@
 #include <string_view>
 #include <utility>
 
-namespace gsradio::log {
+namespace gstradio::log {
 
 void SetVerbose(int level);
 [[nodiscard]] bool IsVerbose();
@@ -41,6 +41,6 @@ void Debug(std::format_string<Args...> fmt, Args&&... args) {
     if (IsVerbose()) Write(std::format(fmt, std::forward<Args>(args)...), true);
 }
 
-}  // namespace gsradio::log
+}  // namespace gstradio::log
 
-#endif  // GSRADIO_SRC_LOG_H_
+#endif  // GSTRADIO_SRC_LOG_H_

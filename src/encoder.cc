@@ -1,10 +1,10 @@
-// Copyright 2026 The gsradio Authors
+// Copyright 2026 The gstradio Authors
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "src/encoder.h"
 
 #include <gst/audio/audio.h>
-#if GSRADIO_HAVE_LIBLAME
+#if GSTRADIO_HAVE_LIBLAME
 #include <lame/lame.h>
 #endif
 
@@ -18,7 +18,7 @@
 
 #include "src/log.h"
 
-namespace gsradio {
+namespace gstradio {
 namespace {
 
 constexpr std::array kMpeg1Bitrates{32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320};
@@ -57,7 +57,7 @@ int LameLowpass(int kbps) {
 }  // namespace
 
 int LameDefaultSamplerate(int in, int bitrate_kbps, int channels) {
-#if GSRADIO_HAVE_LIBLAME
+#if GSTRADIO_HAVE_LIBLAME
     // Ask LAME itself, exactly as IceS 0.4 did after lame_init_params().
     if (lame_global_flags* lame = lame_init()) {
         lame_set_in_samplerate(lame, in);
@@ -218,4 +218,4 @@ std::expected<void, std::string> Encoder::PollBus() {
     return {};
 }
 
-}  // namespace gsradio
+}  // namespace gstradio

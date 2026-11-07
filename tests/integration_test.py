@@ -380,7 +380,7 @@ def test_stdin():
 
 def test_command_line():
     rc, out = run_gsradio(["-V"])
-    check(rc == 0 and out.startswith("gsradio 0.3"), out)
+    check(rc == 0 and out.startswith("gsradio 0.4"), out)
     rc, out = run_gsradio(["-Z"])
     check(rc == 1 and "Unknown option: -Z" in out, out)
     rc, out = run_gsradio(["-c", "/nonexistent.conf"])

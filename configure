@@ -5,7 +5,7 @@
 # configure - detect dependencies and write config.mk and src/build_config.h.
 # Run ./configure --help for options. Written for POSIX sh.
 
-VERSION=0.3
+VERSION=0.4
 
 prefix=/usr/local
 exec_prefix=

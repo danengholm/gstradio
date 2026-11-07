@@ -20,6 +20,7 @@ struct State {
     std::mutex mutex;
     std::FILE* file = nullptr;
     std::filesystem::path path;
+    std::optional<std::string> timestamp_format;
 };
 
 State& GetState() {
@@ -53,6 +54,12 @@ void SetVerbose(int level) { g_verbose = level; }
 bool IsVerbose() { return g_verbose.load() > 0; }
 void SetDaemon(bool daemon) { g_daemon = daemon; }
 
+void SetTimestampFormat(std::optional<std::string> format) {
+    auto& s = GetState();
+    std::scoped_lock lock(s.mutex);
+    s.timestamp_format = std::move(format);
+}
+
 std::expected<void, std::string> Open(const std::filesystem::path& base_directory) {
     auto& s = GetState();
     std::scoped_lock lock(s.mutex);
@@ -82,19 +89,28 @@ void Write(std::string_view message, bool is_debug) {
     while (!message.empty() && message.back() == '\n') message.remove_suffix(1);
 
     std::scoped_lock lock(s.mutex);
-    if (s.file) {
-        // Unlike the original, timestamp file entries: it makes the log useful.
+    const bool need_time = s.file != nullptr || (!g_daemon && s.timestamp_format.has_value());
+    std::tm local{};
+    if (need_time) {
         // localtime_r() rather than std::chrono::current_zone(), which needs
         // libstdc++'s tzdb and is unreliable outside glibc systems.
         const std::time_t now = std::time(nullptr);
-        std::tm local{};
-        std::array<char, 32> stamp{};
         localtime_r(&now, &local);
+    }
+    if (s.file) {
+        // Unlike the original, timestamp file entries: it makes the log useful.
+        std::array<char, 32> stamp{};
         std::strftime(stamp.data(), stamp.size(), "%Y-%m-%d %H:%M:%S", &local);
         std::println(s.file, "[{}] {}{}", stamp.data(), prefix, message);
     }
     if (!g_daemon) {
-        std::println(stdout, "{}{}", prefix, message);
+        if (s.timestamp_format) {
+            std::array<char, 128> stamp{};
+            std::strftime(stamp.data(), stamp.size(), s.timestamp_format->c_str(), &local);
+            std::println(stdout, "{} {}{}", stamp.data(), prefix, message);
+        } else {
+            std::println(stdout, "{}{}", prefix, message);
+        }
         std::fflush(stdout);
     }
 }

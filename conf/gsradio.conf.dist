@@ -29,6 +29,11 @@
 	 and pid file (if daemonizing). Don't use /tmp if you have l33t h4x0rz
          on your server. -->
     <BaseDirectory>/tmp</BaseDirectory>
+    <!-- Prefix each line logged to the console with a timestamp. Set to 1
+         or leave empty for the default strftime format ("%c"), set to a
+         custom strftime format string, or set to 0 / leave out to disable.
+    <Timestamp>%c</Timestamp>
+    -->
   </Execution>
 
   <Stream>

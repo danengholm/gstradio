@@ -89,6 +89,7 @@ int Main(int argc, char** argv) {
     if (!config) return config.error().code;
 
     log::SetVerbose(config->verbose);
+    log::SetTimestampFormat(config->timestamp_format);
     if (config->daemon) Daemonize(*config);
     log::SetDaemon(config->daemon);
 

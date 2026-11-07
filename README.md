@@ -90,7 +90,7 @@ the audio.
 
 | Feature | Status |
 |---|---|
-| All command line options (`-B -b -C -c -D -d -F -f -g -H -h -i -M -m -N -n -P -p -R -r -S -s -t -u -V -v`) | ✔ |
+| All command line options (`-B -b -C -c -D -d -F -f -g -H -h -i -M -m -N -n -P -p -R -r -S -s -T -t -u -V -v`) | ✔ |
 | XML config (`Configuration` root, `Playlist`/`Execution`/multiple `Stream` sections) | ✔ (gsradio namespace) |
 | Config lookup: given path, then `SYSCONFDIR/<file>`; command line overrides config | ✔ |
 | Multiple streams from one playlist, each with its own server/mount/encoding | ✔ |
@@ -127,7 +127,9 @@ These either fix bugs in ices0 or are unavoidable with modern libraries:
   (ices0 silently fell back to defaults). Unknown options are rejected.
 * `-i` sets the ICY protocol, as ices0's usage text promised (the option was
   documented but did nothing there).
-* Log *file* lines are timestamped; console output is unchanged.
+* Log *file* lines are timestamped; console output is untimestamped by default
+  and can be timestamped with `-T [format]` or `<Timestamp>` (default strftime
+  format `%c`).
 * Exit status is 0 for a normal shutdown and 1 on errors (ices0 always exited
   with 1). The daemon's parent process exits with 0.
 * Perl modules are loaded with `.` in `@INC`, as old Perls did implicitly,

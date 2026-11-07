@@ -4,6 +4,7 @@ gsradio \- stream MP3 audio to an icecast server
 .SH SYNOPSIS
 .B gsradio
 [\fB\-BVv\fR]
+[\fB\-T\fR [\fIformat\fR]]
 [\fB\-c\fR \fIconfigfile\fR]
 [\fB\-D\fR \fIbasedir\fR]
 [\fB\-S builtin\fR [\fB\-F\fR \fIplaylist\fR] [\fB\-r\fR] | \fB\-S python\fR|\fBperl\fR [\fB\-M\fR \fImodule\fR]]
@@ -46,6 +47,11 @@ directory). Command line options override the file.
 .TP
 .BI \-D " basedir"
 Write the log, cue and pid files to \fIbasedir\fR (default /tmp).
+.TP
+.BR \-T " [" \fIformat\fR ]
+Prefix each line logged to standard output with a timestamp formatted by
+\fBstrftime\fR(3). If \fIformat\fR is omitted, \fB%c\fR is used. Disabled
+by default.
 .TP
 .B \-V
 Show version information and compile-time options and exit.
@@ -137,7 +143,7 @@ An XML document whose root is \fBConfiguration\fR in the namespace
 \fBFile\fR, \fBRandomize\fR, \fBType\fR, \fBModule\fR, \fBCrossfade\fR.
 .TP
 .B Execution
-\fBBackground\fR, \fBVerbose\fR, \fBBaseDirectory\fR.
+\fBBackground\fR, \fBVerbose\fR, \fBBaseDirectory\fR, \fBTimestamp\fR.
 .TP
 .B Stream
 (repeatable) \fBServer\fR (\fBHostname\fR, \fBPort\fR, \fBPassword\fR,

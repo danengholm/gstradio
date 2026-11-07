@@ -13,6 +13,7 @@
 #include <expected>
 #include <filesystem>
 #include <format>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -22,6 +23,7 @@ namespace gsradio::log {
 void SetVerbose(int level);
 [[nodiscard]] bool IsVerbose();
 void SetDaemon(bool daemon);
+void SetTimestampFormat(std::optional<std::string> format);
 
 std::expected<void, std::string> Open(const std::filesystem::path& base_directory);
 std::expected<void, std::string> Reopen();

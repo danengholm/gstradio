@@ -385,6 +385,26 @@ def test_command_line():
     check(rc == 1 and "Unknown option: -Z" in out, out)
     rc, out = run_gsradio(["-c", "/nonexistent.conf"])
     check(rc == 1, out)
+    pl = os.path.join(WORK, "empty_cmd.txt")
+    with open(pl, "w") as f:
+        pass
+    rc, out = run_gsradio(["-D", WORK, "-F", pl])
+    check(out.splitlines()[0] == "Logfile opened", out)
+    rc, out = run_gsradio(["-D", WORK, "-T", "%Y", "-F", pl])
+    year = time.strftime("%Y")
+    check(out.splitlines()[0] == f"{year} Logfile opened", out)
+    rc, out = run_gsradio(["-D", WORK, "-T", "-F", pl])
+    first = out.splitlines()[0]
+    check(first.endswith(" Logfile opened") and len(first) > len(" Logfile opened"), out)
+    ts_conf = os.path.join(WORK, "ts.conf")
+    with open(ts_conf, "w") as f:
+        f.write('<?xml version="1.0"?>\n'
+                '<gsradio:Configuration xmlns:gsradio="https://github.com/danengholm/gsradio">\n'
+                f"<Playlist><File>{pl}</File></Playlist>\n"
+                f"<Execution><BaseDirectory>{WORK}</BaseDirectory><Timestamp>%Y</Timestamp></Execution>\n"
+                "</gsradio:Configuration>\n")
+    rc, out = run_gsradio(["-c", ts_conf])
+    check(out.splitlines()[0] == f"{year} Logfile opened", out)
 
 
 TESTS = [v for k, v in sorted(globals().items()) if k.startswith("test_")]

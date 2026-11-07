@@ -52,11 +52,14 @@ struct PlaylistConfig {
     int crossfade = 0;  // seconds, 0 = disabled
 };
 
+inline constexpr std::string_view kDefaultTimestampFormat = "%c";
+
 struct Config {
     std::string configfile = "gsradio.conf";
     bool daemon = false;
     int verbose = 0;
     std::string base_directory = "/tmp";
+    std::optional<std::string> timestamp_format;
     PlaylistConfig playlist;
     std::vector<StreamConfig> streams{StreamConfig{}};
 

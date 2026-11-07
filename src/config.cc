@@ -169,6 +169,14 @@ void ParseExecutionNode(xmlDoc* doc, xmlNode* node, Config& config) {
             config.verbose = ToInt(text);
         } else if (name == "BaseDirectory") {
             config.base_directory = text;
+        } else if (name == "Timestamp") {
+            if (text == "0") {
+                config.timestamp_format.reset();
+            } else if (text.empty() || text == "1") {
+                config.timestamp_format = std::string(kDefaultTimestampFormat);
+            } else {
+                config.timestamp_format = text;
+            }
         } else {
             log::Info("Unknown Execution keyword: {}", name);
         }
@@ -199,7 +207,7 @@ void ParsePlaylistNode(xmlDoc* doc, xmlNode* node, Config& config) {
 
 // Options that take no argument, and all known options.
 constexpr std::string_view kFlagOptions = "BRrsVvi";
-constexpr std::string_view kKnownOptions = "BbCcdDFfghHiMmNnPpRrSstuVv";
+constexpr std::string_view kKnownOptions = "BbCcdDFfghHiMmNnPpRrSstTuVv";
 
 std::optional<std::string> FindConfigfileOption(int argc, char** argv) {
     std::optional<std::string> result;
@@ -207,6 +215,10 @@ std::optional<std::string> FindConfigfileOption(int argc, char** argv) {
         std::string_view arg = argv[i];
         if (arg.size() < 2 || arg[0] != '-') continue;
         if (kFlagOptions.contains(arg[1])) continue;
+        if (arg[1] == 'T') {
+            if (i + 1 < argc && argv[i + 1][0] != '-') ++i;
+            continue;
+        }
         if (arg[1] == 'c' && i + 1 < argc) result = argv[i + 1];
         ++i;  // skip this option's argument
     }
@@ -241,7 +253,11 @@ std::expected<void, ExitRequest> ParseCommandLine(Config& config, int argc, char
             return std::unexpected(ExitRequest{1});
         }
         std::string value;
-        if (!kFlagOptions.contains(opt)) {
+        if (opt == 'T') {
+            if (i + 1 < argc && argv[i + 1][0] != '-') {
+                value = argv[++i];
+            }
+        } else if (!kFlagOptions.contains(opt)) {
             if (i + 1 >= argc) {
                 std::println(stderr, "Option {} requires an argument!", opt);
                 PrintUsage();
@@ -320,6 +336,9 @@ std::expected<void, ExitRequest> ParseCommandLine(Config& config, int argc, char
                 break;
             case 's':
                 stream.is_public = false;
+                break;
+            case 'T':
+                config.timestamp_format = value.empty() ? std::string(kDefaultTimestampFormat) : value;
                 break;
             case 't':
                 if (value == "http") {
@@ -452,6 +471,7 @@ void PrintUsage() {
         "\t-r (randomize playlist)\n"
         "\t-s (private stream)\n"
         "\t-S <perl|python|builtin>\n"
+        "\t-T [strftime format] (timestamp console output)\n"
         "\t-t <http|xaudiocast|icy>\n"
         "\t-u <stream url>\n"
         "\t-v (verbose output)\n"
